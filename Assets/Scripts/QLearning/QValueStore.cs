@@ -3,51 +3,56 @@ using System.Collections.Generic;
 
 namespace QLearning
 {
-    public class QValueStore
+    public class QValueStore : MonoBehaviour
     {
-
-        // Dictionary mapping state string to array of Q-values per action
+        
         private Dictionary<string, float[]> qTable;
-        private const int NUM_ACTIONS = 4;
+        private const int ActionsBuffer = 4;
         
         
         public QValueStore()
         {
+            //create qTable indexed by states and action number in buffer
             qTable = new Dictionary<string, float[]>();
-            InitializeQTable();
+            
+            InitQTable();
         }
         
-        private void InitializeQTable()
+        private void InitQTable()
         {
-            // Pre-populate with all 27 possible states
             var allStates = State.GetAllPossibleStates();
+            
             foreach (var state in allStates)
             {
-                string key = state.ToString();
-                qTable[key] = new float[NUM_ACTIONS];
-                // Initialize with small random values to break ties
-                for (int i = 0; i < NUM_ACTIONS; i++)
-                    qTable[key][i] = Random.Range(-0.1f, 0.1f);
+                //for each state, init q values of each action
+                var key = state.StateString();
+                qTable[key] = new float[ActionsBuffer];
+
+                for (var i = 0; i < ActionsBuffer; i++)
+                {
+                    //initialising all q values to 1
+                    qTable[key][i] = 1.0f;
+                }
+                   
             }
         }
         
 
-
+        
         public Action GetBestAction(State state)
         {
-            string key = state.ToString();
+            var key = state.StateString();
             
-            if (!qTable.ContainsKey(key))
+            if (!qTable.TryGetValue(key, out var values))
             {
-                qTable[key] = new float[NUM_ACTIONS];
-                return new Action(Action.ActionType.MoveToEnemy);
+                qTable[key] = new float[ActionsBuffer];
+                return new Action(Action.ActionType.Flee);
             }
+
+            var bestIndex = 0;
+            var bestValue = values[0];
             
-            float[] values = qTable[key];
-            int bestIndex = 0;
-            float bestValue = values[0];
-            
-            for (int i = 1; i < values.Length; i++)
+            for (var i = 1; i < values.Length; i++)
             {
                 if (values[i] > bestValue)
                 {
@@ -58,22 +63,27 @@ namespace QLearning
             
             return new Action((Action.ActionType)bestIndex);
         }
+        
+        
 
         public float GetQValue(State state, Action action)
         {
-            string key = state.ToString();
+            var key = state.StateString();
             
             if (!qTable.ContainsKey(key))
-                qTable[key] = new float[NUM_ACTIONS];
+                qTable[key] = new float[ActionsBuffer];
             
             return qTable[key][(int)action.Type];
         }
+        
+        
+        
         public void StoreQValue(State state, Action action, float qValue)
         {
-            string key = state.ToString();
+            var key = state.StateString();
             
             if (!qTable.ContainsKey(key))
-                qTable[key] = new float[NUM_ACTIONS];
+                qTable[key] = new float[ActionsBuffer];
             
             qTable[key][(int)action.Type] = qValue;
         }

@@ -19,7 +19,6 @@ namespace QLearning
         [SerializeField] private float rho = 0.1f;
         [SerializeField] private float nu = 0.01f;
         
-        
         //training
         [SerializeField] private bool isTraining = true;
         [SerializeField] private float decisionPeriod = 0.2f;
@@ -35,9 +34,8 @@ namespace QLearning
         [SerializeField] private bool logProgress = true;
         [SerializeField] private int logInterval = 100;
         
-        
-        //store for Q values
-        public QValueStore Store = new QValueStore();
+        //reference to store for Q values
+        [SerializeField]private QValueStore store;
         
         
         //Current state
@@ -84,62 +82,10 @@ namespace QLearning
             if (_decisionTimer >= decisionPeriod)
             {
                 _decisionTimer = 0f;
-                QLearningStep();
+                QLearning(problem,iterations,alpha,gamma,rho,nu);
             }
         }
         
-        
-        private void QLearningStep()
-        {
-            // 1. Get current state
-            currentState = problem.GetCurrentState();
-            
-            // 2. Random restart (nu)
-            if (Random.value < restartProbability)
-            {
-                StartNewEpisode();
-                return;
-            }
-            
-            // 3. Choose action (epsilon-greedy)
-            Action action;
-            List<Action> availableActions = problem.GetAvailableActions(currentState);
-            
-            if (Random.value < epsilon || availableActions.Count == 0)
-            {
-                // Explore: random action
-                action = OneOf(availableActions);
-            }
-            else
-            {
-                // Exploit: best known action
-                action = Store.GetBestAction(currentState);
-            }
-            
-            // 4. Take action and get reward + new state
-            var (reward, newState) = problem.TakeActions(currentState, action);
-            _totalEpisodeRewards += reward;
-            
-            // 5. Q-Learning update
-            float oldQ = Store.GetQValue(currentState, action);
-            float maxFutureQ = Store.GetQValue(newState, Store.GetBestAction(newState));
-            float newQ = (1 - alpha) * oldQ + alpha * (reward + gamma * maxFutureQ);
-            
-            Store.StoreQValue(currentState, action, newQ);
-            
-            // 6. Update state
-            currentState = newState;
-            _currentIteration++;
-            
-            // 7. Log progress
-            if (logProgress && _currentIteration % logInterval == 0)
-            {
-                Debug.Log($"Iteration {_currentIteration}/{iterations} | " +
-                          $"Episode {_episodesCompleted} | " +
-                          $"Epsilon: {epsilon:F3} | " +
-                          $"State: {currentState}");
-            }
-        }
         
         private void StartNewEpisode()
         {
@@ -155,28 +101,76 @@ namespace QLearning
         {
             _episodesCompleted++;
             
-            if (logProgress)
+            //TODO Look into logs and graphs
+            /*if (logProgress)
             {
                 Debug.Log($"Episode {_episodesCompleted} Ended | " +
                           $"Survival: {_episodeTimer:F1}s | " +
                           $"Reward: {_totalEpisodeRewards:F2}");
-            }
-            
-            // Decay epsilon
-            epsilon = Mathf.Max(0.05f, epsilon * 0.995f);
+            }*/
             
             StartNewEpisode();
         }
         
-        
-        
-        
-        //QLearning updates store
         private void QLearning(ReinforcementProblem prob,int iter,float a,float g,float r,float n)
         {
             //starting state
             State state = prob.GetRandomState();
             Action action = new Action();
+
+            //has a current state
+            state = prob.GetCurrentState();
+            
+            
+            //if random between 1 and 0 is less than nu, will explore
+            if (Random.value < n)
+            {
+                state = prob.GetRandomState();
+            }
+            
+            //list of available actions based on state
+            List<Action> actions = prob.GetAvailableActions(state);
+                
+            //use a random action this time?
+            if (Random.value < r)
+            {
+                action = OneOf(actions);
+            }
+            else
+            {
+                //or use best action available
+                action = store.GetBestAction(state);
+            }
+
+            //perform action and retrieve the reward and new state
+            var (reward, newState) = prob.TakeActions(state, action);
+                
+            //Get the current q from store
+            float Q = store.GetQValue(state, action);
+                
+            //get the q of the best action from the new state
+            float maxQ = store.GetQValue(newState, store.GetBestAction(newState));
+                
+            //Perform the q learning
+            Q = (1 - a) * Q + a * (reward + g * maxQ);
+                
+            //Store the new Q value
+            store.StoreQValue(state,action, Q);
+                
+            //update state
+            currentState = newState;
+            _currentIteration++;
+            
+        }
+        
+        
+        //QLearning updates store
+        private void QLearningIter(ReinforcementProblem prob,int iter,float a,float g,float r,float n)
+        {
+            //starting state
+            State state = prob.GetRandomState();
+            Action action = new Action();
+            
             
 
             //Repeat
@@ -201,23 +195,23 @@ namespace QLearning
                 else
                 {
                     //or use best action available
-                    action = Store.GetBestAction(state);
+                    action = store.GetBestAction(state);
                 }
                 
                 //perform action and retrieve the reward and new state
                 var (reward, newState) = prob.TakeActions(state, action);
                 
                 //Get the current q from store
-                float Q = Store.GetQValue(state, action);
+                float Q = store.GetQValue(state, action);
                 
                 //get the q of the best action from the new state
-                float maxQ = Store.GetQValue(newState, Store.GetBestAction(newState));
+                float maxQ = store.GetQValue(newState, store.GetBestAction(newState));
                 
                 //Perform the q learning
                 Q = (1 - a) * Q + a * (reward + g * maxQ);
                 
                 //Store the new Q value
-                Store.StoreQValue(state,action, Q);
+                store.StoreQValue(state,action, Q);
                 
                 //update state
                 state = newState;
@@ -229,7 +223,7 @@ namespace QLearning
         private Action OneOf(List<Action> actions)
         {
             if (actions == null || actions.Count == 0)
-                return new Action(Action.ActionType.MoveToEnemy);
+                return new Action(Action.ActionType.Flee);
                 
             return actions[Random.Range(0, actions.Count)];
         }
