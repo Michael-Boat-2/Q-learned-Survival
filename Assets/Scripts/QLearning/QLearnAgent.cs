@@ -63,7 +63,7 @@ namespace QLearning
             //Check if training has completed
             if (_currentIteration >= iterations)
             {
-                Debug.Log("TRAINING COMPLETE!");
+                Debug.Log("Training completed");
                 isTraining = false;
                 
                 //Store information somehow
@@ -100,22 +100,14 @@ namespace QLearning
         private void EndEpisode()
         {
             _episodesCompleted++;
-            
-            //TODO Look into logs and graphs
-            /*if (logProgress)
-            {
-                Debug.Log($"Episode {_episodesCompleted} Ended | " +
-                          $"Survival: {_episodeTimer:F1}s | " +
-                          $"Reward: {_totalEpisodeRewards:F2}");
-            }*/
-            
+         
             StartNewEpisode();
         }
         
         private void QLearning(ReinforcementProblem prob,int iter,float a,float g,float r,float n)
         {
             //starting state
-            State state = prob.GetRandomState();
+            State state = ReinforcementProblem.GetRandomState();
             Action action = new Action();
 
             //has a current state
@@ -125,7 +117,7 @@ namespace QLearning
             //if random between 1 and 0 is less than nu, will explore
             if (Random.value < n)
             {
-                state = prob.GetRandomState();
+                state = ReinforcementProblem.GetRandomState();
             }
             
             //list of available actions based on state
@@ -168,7 +160,7 @@ namespace QLearning
         private void QLearningIter(ReinforcementProblem prob,int iter,float a,float g,float r,float n)
         {
             //starting state
-            State state = prob.GetRandomState();
+            State state = ReinforcementProblem.GetRandomState();
             Action action = new Action();
             
             
@@ -180,7 +172,7 @@ namespace QLearning
                 //if random between 1 and 0 is less than nu
                 if (Random.value < n)
                 {
-                    state = prob.GetRandomState();
+                    state = ReinforcementProblem.GetRandomState();
                 }
                 
                 //list of available actions based on state
@@ -228,7 +220,7 @@ namespace QLearning
             return actions[Random.Range(0, actions.Count)];
         }
         
-        //Need methods to train publicly
+   
         
         
     }

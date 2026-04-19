@@ -5,25 +5,27 @@ namespace QLearning
 {
     public class ReinforcementProblem : MonoBehaviour
     {
-        [Header("Agent References")]
+        
         [SerializeField] private Transform agentTransform;
         [SerializeField] private float moveSpeed = 5f;
-        
-        [Header("Agent Stats")]
         [SerializeField] private float currentHealth = 100f;
         [SerializeField] private float maxHealth = 100f;
         [SerializeField] private int currentAmmo = 6;
         [SerializeField] private int maxAmmo = 6;
+      
+     
+        [SerializeField]private float shotRange = 15f;
+        [SerializeField]private float fireRate = 2f;
         
-        [Header("Distance Thresholds")]
+        //Health threshold
+        [SerializeField] private float criticalHealth = 0.3f;
+        [SerializeField] private float hurtHealth = 0.6f;
+        
+        //Distance threshold
         [SerializeField] private float nearDistance = 5f;
         [SerializeField] private float mediumDistance = 12f;
         
-        [Header("Health Thresholds")]
-        [SerializeField] private float criticalHealth = 30f;
-        [SerializeField] private float hurtHealth = 70f;
-        
-        [Header("Rewards")]
+        //Rewards
         [SerializeField] private float survivalReward = 0.01f;
         [SerializeField] private float healthGainReward = 0.5f;
         [SerializeField] private float healthLossPenalty = 0.3f;
@@ -31,264 +33,356 @@ namespace QLearning
         [SerializeField] private float killReward = 1.0f;
         [SerializeField] private float deathPenalty = 5.0f;
         
-        // Tracking variables
-        private float lastHealth;
-        private int lastAmmo;
-        private bool enemyKilledThisStep;
-        private GameObject nearestEnemy;
+        
+        private Vector3 startPosition;
+        
+        private float shotDamage = 100f;
+        private bool zombieKilled;
+        private float fireTimer = 0f;
+        
+        
+        private float prevHealth;
+        private int prevAmmo;
+        
+        private GameObject nearestZombie;
         private GameObject nearestPickup;
         
         private void Start()
         {
-            lastHealth = currentHealth;
-            lastAmmo = currentAmmo;
+            startPosition = transform.position;
+            prevHealth = currentHealth;
+            prevAmmo = currentAmmo;
+        }
+
+
+        private void Update()
+        {
+            if(fireTimer > 0)
+             fireTimer -= Time.deltaTime;
         }
         
-        // ===== CORE RL METHODS =====
         
+        
+        //Returns state based on discrete vals of variables
         public State GetCurrentState()
         {
-            int enemyDist = GetEnemyDistanceCategory();
-            int ammo = GetAmmoCategory();
-            int health = GetHealthCategory();
+            var zombieDist = GetZombieDistanceCategory();
+            var ammo = GetAmmoCategory();
+            var health = GetHealthCategory();
             
-            return new State(enemyDist, ammo, health);
+            return new State(zombieDist, ammo, health);
         }
         
-        public State GetRandomState()
+        
+        public static State GetRandomState()
         {
-            return new State(
-                Random.Range(0, 3),
-                Random.Range(0, 3),
-                Random.Range(0, 3)
-            );
+            var zombieDist = Random.Range(0, 3);
+            var ammo = Random.Range(0, 3);
+            var health = Random.Range(0, 3);
+            
+            return new State(zombieDist, ammo, health);
         }
+        
         
         public List<Action> GetAvailableActions(State state)
         {
             var actions = new List<Action>();
             
-            // All movement actions are always available
-            actions.Add(new Action(Action.ActionType.MoveToEnemy));
-            actions.Add(new Action(Action.ActionType.FleeFromEnemy));
+            actions.Add(new Action(Action.ActionType.HoldPosition));
+            actions.Add(new Action(Action.ActionType.Flee));
             actions.Add(new Action(Action.ActionType.MoveToPickup));
             
-            // Shoot only available if ammo > 0 and enemy exists
-            if (currentAmmo > 0 && FindNearestEnemy() != null)
+            // Shoot action requires ammo, an enemy and fire rate control
+            if (currentAmmo > 0 && FindNearestZombie() && fireTimer <= 0)
                 actions.Add(new Action(Action.ActionType.Shoot));
             
             return actions;
         }
         
+        
         public (float reward, State newState) TakeActions(State state, Action action)
         {
-            // Store previous values for reward calculation
-            lastHealth = currentHealth;
-            lastAmmo = currentAmmo;
-            enemyKilledThisStep = false;
+            prevHealth = currentHealth;
+            prevAmmo = currentAmmo;
+            zombieKilled = false;
             
-            // Execute the action
+            //Take action
             ExecuteAction(action);
             
-            // Calculate reward based on what happened
-            float reward = CalculateReward();
-            
-            // Get the new state after action execution
+            var reward = CalculateReward();
             State newState = GetCurrentState();
             
             return (reward, newState);
         }
         
-        // ===== ACTION EXECUTION =====
+        
         
         private void ExecuteAction(Action action)
         {
             switch (action.Type)
             {
-                case Action.ActionType.MoveToEnemy:
-                    MoveToward(FindNearestEnemy());
+                
+                case Action.ActionType.HoldPosition:
+                    //will do nothing and stand
                     break;
-                    
-                case Action.ActionType.FleeFromEnemy:
-                    GameObject enemy = FindNearestEnemy();
-                    if (enemy != null)
+                
+                
+                case Action.ActionType.Flee:
+                    var enemy = FindNearestZombie();
+                    if (enemy)
                     {
-                        Vector3 awayDir = (agentTransform.position - enemy.transform.position).normalized;
-                        MoveToward(agentTransform.position + awayDir * 10f);
+                        Vector3 direction = (agentTransform.position - enemy.transform.position).normalized;
+                        Move(agentTransform.position + direction * mediumDistance);
                     }
                     break;
                     
                 case Action.ActionType.MoveToPickup:
-                    MoveToward(FindNearestPickup());
+                    var pickUp = FindNearestPickup();
+                    if(pickUp)
+                        Move(pickUp.transform.position);
                     break;
                     
                 case Action.ActionType.Shoot:
                     if (currentAmmo > 0)
                     {
-                        ShootAt(FindNearestEnemy());
+                        var target = FindNearestZombie();
+                        if(target)
+                         Shoot(target);
                         currentAmmo--;
                     }
                     break;
             }
         }
         
-        private void MoveToward(GameObject target)
+        
+        private void Move(Vector3 target)
         {
-            if (target == null) return;
-            MoveToward(target.transform.position);
+            Vector3 direction = (target - agentTransform.position).normalized;
+            agentTransform.position += direction * moveSpeed * Time.fixedDeltaTime;
         }
         
-        private void MoveToward(Vector3 target)
-        {
-            Vector3 dir = (target - agentTransform.position).normalized;
-            agentTransform.position += dir * moveSpeed * Time.fixedDeltaTime;
-        }
         
-        private void ShootAt(GameObject target)
+        
+        private void Shoot(GameObject target)
         {
-            if (target == null) return;
             
-            // Simple hit-scan shooting
+            fireTimer = fireRate;
+            
             float distance = Vector3.Distance(agentTransform.position, target.transform.position);
-            if (distance < 15f)
+            if (distance < shotRange)
             {
                 var zombie = target.GetComponent<ZombieAI>();
-                if (zombie != null)
+                if (zombie)
                 {
-                    zombie.TakeDamage(34f);
+                    zombie.TakeDamage(shotDamage);
                     if (zombie.IsDead())
                     {
-                        //zombie was killed
-                        enemyKilledThisStep = true;
+                        zombieKilled = true;
                     }
                        
                 }
             }
         }
         
-        // ===== REWARD CALCULATION =====
         
+        //Reward Function
         private float CalculateReward()
         {
             float reward = 0f;
             
-            // Small survival reward for staying alive
+            // Gain base reward for surviving
             reward += survivalReward;
             
-            // Health changes
-            float healthDelta = currentHealth - lastHealth;
-            if (healthDelta > 0) reward += healthGainReward;
-            if (healthDelta < 0) reward -= healthLossPenalty;
+            // Health Rewards for gains, Penalty for loss
+            float HealthChange = currentHealth - prevHealth;
+
+            if (HealthChange < 0)
+            {
+                reward -= healthLossPenalty;
+                
+            }
+            else if (HealthChange > 0)
+            {
+                reward += healthGainReward;
+            }
             
-            // Ammo pickup
-            if (currentAmmo > lastAmmo) reward += ammoPickupReward;
+            // Reward for gaining ammo
+            if (currentAmmo > prevAmmo) reward += ammoPickupReward;
             
-            // Kill reward
-            if (enemyKilledThisStep) reward += killReward;
+            // Reward for killing a zombie
+            if (zombieKilled) reward += killReward;
             
-            // Death penalty (applied separately when health reaches zero)
+            // Death penalty
             if (currentHealth <= 0) reward -= deathPenalty;
             
             return reward;
+            
         }
         
-        // ===== STATE CATEGORIZATION =====
         
-        private int GetEnemyDistanceCategory()
+        
+        private int GetZombieDistanceCategory()
         {
-            nearestEnemy = FindNearestEnemy();
-            if (nearestEnemy == null) return 2; // Far/None
+            nearestZombie = FindNearestZombie();
             
-            float dist = Vector3.Distance(agentTransform.position, nearestEnemy.transform.position);
-            if (dist < nearDistance) return 0;      // Near
-            if (dist < mediumDistance) return 1;    // Medium
-            return 2;                               // Far
+            if (!nearestZombie)
+            {
+                // No Zombies Nearby, or far
+                return 2; 
+            }
+            
+            var dist = Vector3.Distance(agentTransform.position, nearestZombie.transform.position);
+            
+            if (dist < nearDistance)
+            {
+                // Near
+                return 0;     
+            }
+
+            if (dist < mediumDistance)
+            {
+                //At a Medium Distance
+                return 1;
+            }
+            
+            // Zombies Too Far
+            return 2;                               
         }
         
         private int GetAmmoCategory()
         {
-            if (currentAmmo == 0) return 0;         // Empty
-            if (currentAmmo <= 2) return 1;         // Low
-            return 2;                               // Has Ammo
+
+            if (currentAmmo == 0)
+            {
+                //Out of Ammo
+                return 0;
+            }
+
+            if (currentAmmo <= 2)
+            {
+                //Low on Ammo
+                return 1;
+            }
+            
+            //High Ammo
+            return 2;
+            
         }
         
         private int GetHealthCategory()
         {
-            if (currentHealth < criticalHealth) return 0;   // Critical
-            if (currentHealth < hurtHealth) return 1;       // Hurt
-            return 2;                                       // Healthy
+            
+            if (currentHealth/maxHealth < criticalHealth)
+            {
+                //Health is Critical
+                return 0;
+            }
+
+            if (currentHealth/maxHealth < hurtHealth)
+            {
+                //Agent has been hurt
+                return 1;
+            }
+            
+            //Heart if full
+            return 2;
+            
         }
         
-        // ===== HELPER METHODS =====
+       
         
-        private GameObject FindNearestEnemy()
+        private GameObject FindNearestZombie()
         {
-            GameObject[] enemies = GameObject.FindGameObjectsWithTag("Enemy");
-            GameObject nearest = null;
-            float minDist = float.MaxValue;
+            var zombies = GameObject.FindGameObjectsWithTag("Zombie");
             
-            foreach (var enemy in enemies)
+            GameObject nearest = null;
+            var minDist = float.MaxValue;
+            
+            foreach (var z in zombies)
             {
-                float dist = Vector3.Distance(agentTransform.position, enemy.transform.position);
-                if (dist < minDist)
-                {
-                    minDist = dist;
-                    nearest = enemy;
-                }
+                var dist = Vector3.Distance(agentTransform.position, z.transform.position);
+                if (!(dist < minDist)) continue;
+                minDist = dist;
+                nearest = z;
             }
+            
             return nearest;
         }
         
         private GameObject FindNearestPickup()
         {
-            GameObject[] pickups = GameObject.FindGameObjectsWithTag("Pickup");
+            var pickups = GameObject.FindGameObjectsWithTag("Pickup");
             GameObject nearest = null;
-            float minDist = float.MaxValue;
+            var minDist = float.MaxValue;
             
             foreach (var pickup in pickups)
             {
-                float dist = Vector3.Distance(agentTransform.position, pickup.transform.position);
-                if (dist < minDist)
-                {
-                    minDist = dist;
-                    nearest = pickup;
-                }
+                var dist = Vector3.Distance(agentTransform.position, pickup.transform.position);
+                if (!(dist < minDist)) continue;
+                minDist = dist;
+                nearest = pickup;
             }
+            
             return nearest;
         }
         
-        // ===== PUBLIC METHODS FOR GAME SYSTEMS =====
+        
         
         public void TakeDamage(float damage)
         {
-            currentHealth = Mathf.Max(0, currentHealth - damage);
+            if (currentHealth - damage <= 0)
+            {
+                currentHealth = 0;
+            }
+            else
+            {
+                currentHealth -= damage;
+            }
         }
         
         public void Heal(float amount)
         {
-            currentHealth = Mathf.Min(maxHealth, currentHealth + amount);
+
+            if (currentHealth + amount > maxHealth)
+            {
+                currentHealth = maxHealth;
+            }
+            else
+            {
+                currentHealth += amount;
+            }
+            
         }
         
         public void AddAmmo(int amount)
         {
-            currentAmmo = Mathf.Min(maxAmmo, currentAmmo + amount);
+            if (currentAmmo + amount > maxAmmo)
+            {
+                currentAmmo = maxAmmo;
+            }
+            else
+            {
+                currentAmmo += amount;
+            }
         }
+
+        public bool IsDead()
+        {
+            return currentHealth <= 0;
+        } 
         
-        public bool IsDead() => currentHealth <= 0;
         
         public void ResetAgent()
         {
             currentHealth = maxHealth;
             currentAmmo = maxAmmo;
-            lastHealth = currentHealth;
-            lastAmmo = currentAmmo;
-            enemyKilledThisStep = false;
+            prevHealth = currentHealth;
+            prevAmmo = currentAmmo;
+            zombieKilled = false;
             
-            // Reset position
-            agentTransform.position = Vector3.zero;
+            agentTransform.position = startPosition;
         }
         
-        public float GetHealth() => currentHealth;
-        public int GetAmmo() => currentAmmo;
+     
     }
 }
