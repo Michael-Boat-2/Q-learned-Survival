@@ -12,16 +12,24 @@ namespace QLearning
         
         //iterations
         [SerializeField] private int iterations = 1000;
-        [SerializeField] private float alpha = 0.1f;
-        [SerializeField] private float gamma = 0.9f;
-        [SerializeField] private float rho = 0.2f;
+        private int _currentIteration = 0;
+        
+        [SerializeField] private float alpha = 0.3f;
+        [SerializeField] private float gamma = 0.75f;
+        [SerializeField] private float rho = 0.1f;
         [SerializeField] private float nu = 0.01f;
         
         
         //training
         [SerializeField] private bool isTraining = true;
-        [SerializeField] private float decisionInterval = 0.2f;
+        [SerializeField] private float decisionPeriod = 0.2f;
+         private float _decisionTimer = 0f;
+         
         [SerializeField] private float episodeTimeout = 30f;
+        private float _episodeTimer = 0f;
+        private int _episodesCompleted = 0;
+        private float _totalEpisodeRewards = 0f;
+        
         
         //debugging
         [SerializeField] private bool logProgress = true;
@@ -32,14 +40,7 @@ namespace QLearning
         public QValueStore Store = new QValueStore();
         
         
-            
-        //Control var
-        private int currentIteration = 0;
-        private float decisionTimer = 0f;
-        private float episodeTimer = 0f;
-        private int episodesCompleted = 0;
-        private float totalRewardThisEpisode = 0f;
-        
+        //Current state
         private State currentState;
         private bool isDead = false;
 
@@ -48,7 +49,6 @@ namespace QLearning
         {
             if (problem)
             {
-                //Start new episode
                 StartNewEpisode();
             }
         }
@@ -58,27 +58,32 @@ namespace QLearning
         private void Update()
         {
             if (!isTraining) return;
-            if (currentIteration >= iterations)
+            
+            _episodeTimer += Time.deltaTime;
+            _decisionTimer += Time.deltaTime;
+            
+            //Check if training has completed
+            if (_currentIteration >= iterations)
             {
                 Debug.Log("TRAINING COMPLETE!");
                 isTraining = false;
-                //Store.SaveToFile("trained_qtable.json");
+                
+                //Store information somehow
                 return;
             }
             
-            episodeTimer += Time.deltaTime;
-            
-            // Check episode end conditions
-            if (problem.IsDead() || episodeTimer >= episodeTimeout)
+            //end after 30 seconds, or when player dies
+            //TODO have problem is Dead call End Episode
+            if (problem.IsDead() || _episodeTimer >= episodeTimeout)
             {
                 EndEpisode();
                 return;
             }
             
-            decisionTimer += Time.deltaTime;
-            if (decisionTimer >= decisionInterval)
+            //Learn
+            if (_decisionTimer >= decisionPeriod)
             {
-                decisionTimer = 0f;
+                _decisionTimer = 0f;
                 QLearningStep();
             }
         }
@@ -113,7 +118,7 @@ namespace QLearning
             
             // 4. Take action and get reward + new state
             var (reward, newState) = problem.TakeActions(currentState, action);
-            totalRewardThisEpisode += reward;
+            _totalEpisodeRewards += reward;
             
             // 5. Q-Learning update
             float oldQ = Store.GetQValue(currentState, action);
@@ -124,13 +129,13 @@ namespace QLearning
             
             // 6. Update state
             currentState = newState;
-            currentIteration++;
+            _currentIteration++;
             
             // 7. Log progress
-            if (logProgress && currentIteration % logInterval == 0)
+            if (logProgress && _currentIteration % logInterval == 0)
             {
-                Debug.Log($"Iteration {currentIteration}/{iterations} | " +
-                          $"Episode {episodesCompleted} | " +
+                Debug.Log($"Iteration {_currentIteration}/{iterations} | " +
+                          $"Episode {_episodesCompleted} | " +
                           $"Epsilon: {epsilon:F3} | " +
                           $"State: {currentState}");
             }
@@ -139,8 +144,8 @@ namespace QLearning
         private void StartNewEpisode()
         {
             problem.ResetAgent();
-            episodeTimer = 0f;
-            totalRewardThisEpisode = 0f;
+            _episodeTimer = 0f;
+            _totalEpisodeRewards = 0f;
             currentState = problem.GetCurrentState();
             isDead = false;
         }
@@ -148,13 +153,13 @@ namespace QLearning
         
         private void EndEpisode()
         {
-            episodesCompleted++;
+            _episodesCompleted++;
             
             if (logProgress)
             {
-                Debug.Log($"Episode {episodesCompleted} Ended | " +
-                          $"Survival: {episodeTimer:F1}s | " +
-                          $"Reward: {totalRewardThisEpisode:F2}");
+                Debug.Log($"Episode {_episodesCompleted} Ended | " +
+                          $"Survival: {_episodeTimer:F1}s | " +
+                          $"Reward: {_totalEpisodeRewards:F2}");
             }
             
             // Decay epsilon
