@@ -17,7 +17,7 @@ namespace QLearning
         [SerializeField] private float alpha = 0.3f;
         [SerializeField] private float gamma = 0.75f;
         [SerializeField] private float rho = 0.1f;
-        [SerializeField] private float nu = 0.01f;
+        //[SerializeField] private float nu = 0.01f;
         
         //training
         [SerializeField] private bool isTraining = true;
@@ -82,7 +82,7 @@ namespace QLearning
             if (_decisionTimer >= decisionPeriod)
             {
                 _decisionTimer = 0f;
-                QLearning(problem,iterations,alpha,gamma,rho,nu);
+                QLearning();
             }
         }
         
@@ -104,27 +104,20 @@ namespace QLearning
             StartNewEpisode();
         }
         
-        private void QLearning(ReinforcementProblem prob,int iter,float a,float g,float r,float n)
+        private void QLearning()
         {
-            //starting state
-            State state = ReinforcementProblem.GetRandomState();
-            Action action = new Action();
-
+           
+            
             //has a current state
-            state = prob.GetCurrentState();
+            State state = problem.GetCurrentState();
+            Action action = new Action();
             
-            
-            //if random between 1 and 0 is less than nu, will explore
-            if (Random.value < n)
-            {
-                state = ReinforcementProblem.GetRandomState();
-            }
             
             //list of available actions based on state
-            List<Action> actions = prob.GetAvailableActions(state);
+            List<Action> actions = problem.GetAvailableActions(state);
                 
             //use a random action this time?
-            if (Random.value < r)
+            if (Random.value < rho)
             {
                 action = OneOf(actions);
             }
@@ -135,7 +128,7 @@ namespace QLearning
             }
 
             //perform action and retrieve the reward and new state
-            var (reward, newState) = prob.TakeActions(state, action);
+            var (reward, newState) = problem.TakeActions(state, action);
                 
             //Get the current q from store
             float Q = store.GetQValue(state, action);
@@ -144,7 +137,7 @@ namespace QLearning
             float maxQ = store.GetQValue(newState, store.GetBestAction(newState));
                 
             //Perform the q learning
-            Q = (1 - a) * Q + a * (reward + g * maxQ);
+            Q = (1 - alpha) * Q + alpha * (reward + gamma * maxQ);
                 
             //Store the new Q value
             store.StoreQValue(state,action, Q);
@@ -156,7 +149,7 @@ namespace QLearning
         }
         
         
-        //QLearning updates store
+        /*//QLearning updates store
         private void QLearningIter(ReinforcementProblem prob,int iter,float a,float g,float r,float n)
         {
             //starting state
@@ -210,7 +203,7 @@ namespace QLearning
 
             }
             
-        }
+        }*/
         
         private Action OneOf(List<Action> actions)
         {

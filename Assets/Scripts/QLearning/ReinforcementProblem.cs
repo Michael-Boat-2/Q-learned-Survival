@@ -32,7 +32,9 @@ namespace QLearning
         [SerializeField] private float ammoPickupReward = 0.4f;
         [SerializeField] private float killReward = 1.0f;
         [SerializeField] private float deathPenalty = 5.0f;
-        
+
+
+        [SerializeField] private PlayerModel player;
         
         private Vector3 startPosition;
         
@@ -49,7 +51,7 @@ namespace QLearning
         
         private void Start()
         {
-            startPosition = transform.position;
+            startPosition = agentTransform.position;
             prevHealth = currentHealth;
             prevAmmo = currentAmmo;
         }
@@ -149,6 +151,7 @@ namespace QLearning
                         if(target)
                          Shoot(target);
                         currentAmmo--;
+                        fireTimer = fireRate;
                     }
                     break;
             }
@@ -165,8 +168,6 @@ namespace QLearning
         
         private void Shoot(GameObject target)
         {
-            
-            fireTimer = fireRate;
             
             float distance = Vector3.Distance(agentTransform.position, target.transform.position);
             if (distance < shotRange)
@@ -280,7 +281,7 @@ namespace QLearning
 
             if (currentHealth/maxHealth < hurtHealth)
             {
-                //Agent has been hurt
+                //Agent is hurt
                 return 1;
             }
             
@@ -325,11 +326,34 @@ namespace QLearning
             
             return nearest;
         }
+
+
+        public float GetHealth()
+        {
+            return currentHealth;
+        }
         
-        
+
+        public float GetHealthRatio()
+        {
+            return currentHealth/maxHealth;
+        }
+
+        public float GetAmmo()
+        {
+            return currentAmmo;
+        }
+
+        public float GetAmmoRatio()
+        {
+            return (float)currentAmmo/maxAmmo;
+        }
         
         public void TakeDamage(float damage)
         {
+            
+            player.UpdateHits();
+            
             if (currentHealth - damage <= 0)
             {
                 currentHealth = 0;

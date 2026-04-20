@@ -8,7 +8,7 @@ namespace QLearning
     {
     
         [SerializeField] private NavMeshAgent navMeshAgent;
-        [SerializeField] private Character targetAgent;
+        [SerializeField] private Transform targetAgent;
 
         [SerializeField] private float health = 100f;
         

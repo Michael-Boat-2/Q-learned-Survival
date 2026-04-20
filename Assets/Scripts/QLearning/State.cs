@@ -9,7 +9,7 @@ namespace QLearning
         public int AmmoStatus { get; set; }     
         public int HealthStatus { get; set; }   
         
-        public int TimeSinceEncounter { get; set; }
+        //public int TimeSinceEncounter { get; set; }
         
         
         //State is based on below variables
