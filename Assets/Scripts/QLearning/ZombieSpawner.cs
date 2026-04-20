@@ -109,9 +109,15 @@ namespace QLearning
         {
             _isResting = true;
             _restTimer = duration;
+
+            foreach (var zombie in activeZombies)
+            {
+                var z = zombie.GetComponent<ZombieAI>();
+                z.TakeDamage(100f);
+            }
         }
         
-        public void SpawnStrongEnemy(GameObject strongPrefab)
+        public void SpawnBossZombie(GameObject strongPrefab)
         {
             Vector3 spawnPos = GetSpawnPosition();
             GameObject strong = Instantiate(strongPrefab, spawnPos, Quaternion.identity);
@@ -120,7 +126,6 @@ namespace QLearning
         
         public void SpawnWave(int count)
         {
-            
             for (int i = 0; i < count; i++)
             {
                 if (activeZombies.Count < maxZombies)
@@ -130,9 +135,9 @@ namespace QLearning
             }
         }
         
-        public int GetZombieDensity()
+        public float GetZombieDensity()
         {
-            return activeZombies.Count/maxZombies;
+            return (float)activeZombies.Count/maxZombies;
         }
         
         

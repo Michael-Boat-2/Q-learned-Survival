@@ -17,9 +17,8 @@ namespace QLearning
         
         public Difficulty Level {get;set;}
         
-        
         //Maintain Tension Curve
-        [SerializeField]private float targetTension = 0.7f;
+        [SerializeField]private float targetTension = 0.65f;
         [SerializeField]private float currentTension;
 
         //Monitor Player State on Model
@@ -45,7 +44,7 @@ namespace QLearning
 
         //spawn boss
         [SerializeField] private bool hasScriptedEvent = false;
-        [SerializeField] private float eventTiming;
+        [SerializeField] private float eventCooldown;
         [SerializeField] private GameObject bossZombie;
 
         private float _eventTimer;
@@ -66,18 +65,17 @@ namespace QLearning
 
         private void Start()
         {
-            
+            //Level = Difficulty.AI;
         }
 
 
         private void Update()
         {
-
             
             _episodeTimer += Time.deltaTime;
             
             
-            GetTension();
+            CheckTension();
             
             //Switch Difficulty
             switch (Level)
@@ -151,12 +149,13 @@ namespace QLearning
             ChangeRates();
             
             
-            if (hasScriptedEvent)
+            if (hasScriptedEvent && Level == Difficulty.AI)
             {
-                _eventTimer += Time.deltaTime;
+                _eventTimer -= Time.deltaTime;
                 
                 //See if can perform events to adjust tension
-                
+                CheckScriptedEvents();
+
             }
             
             
@@ -206,7 +205,26 @@ namespace QLearning
             zSpawner.TriggerRestPeriod(5f);
             
         }
-       
+
+        private void CheckScriptedEvents()
+        {
+            if(_eventTimer > 0f) return;
+
+            if (currentTension > targetTension && player.Engagement > 0.6f)
+            {
+                //spawn a boss if player is engaged and game is tense
+                zSpawner.SpawnBossZombie(bossZombie);
+                _eventTimer = eventCooldown;
+            }
+            else if (currentTension < 0.3f && _episodeTimer > 15f)
+            {
+                //spawn up to 6 zombies at once if tension is low
+                zSpawner.SpawnWave(6);
+                _eventTimer = eventCooldown;
+                
+            }
+            
+        }
         
         
         public void Clear()

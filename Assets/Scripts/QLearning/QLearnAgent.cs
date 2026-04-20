@@ -110,7 +110,7 @@ namespace QLearning
             
             //has a current state
             State state = problem.GetCurrentState();
-            Action action = new Action();
+            Action action;
             
             
             //list of available actions based on state

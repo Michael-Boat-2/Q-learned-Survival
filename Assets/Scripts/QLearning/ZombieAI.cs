@@ -105,8 +105,16 @@ namespace QLearning
         public void TakeDamage(float amount)
         {
             health -= amount;
-            if (health <= 0)
-                Destroy(gameObject);
+            if (!(health <= 0)) return;
+            
+            var playerModel = GameObject.FindFirstObjectByType<PlayerModel>();
+            if (playerModel)
+            {
+                playerModel.UpdateKills();
+            }
+                
+            Destroy(gameObject);
+
         }
         
         

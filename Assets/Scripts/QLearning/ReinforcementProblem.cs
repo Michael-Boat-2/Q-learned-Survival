@@ -48,6 +48,8 @@ namespace QLearning
         
         private GameObject nearestZombie;
         private GameObject nearestPickup;
+
+        private float rewardScale = 1f;
         
         private void Start()
         {
@@ -184,6 +186,12 @@ namespace QLearning
                 }
             }
         }
+
+
+        public void SetRewardScale(float scale)
+        {
+            rewardScale = scale < 0.1f ? 0.1f : scale;
+        }
         
         
         //Reward Function
@@ -216,7 +224,8 @@ namespace QLearning
             // Death penalty
             if (currentHealth <= 0) reward -= deathPenalty;
             
-            return reward;
+            //director scales reward
+            return reward * rewardScale; ;
             
         }
         

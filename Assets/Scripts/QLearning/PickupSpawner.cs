@@ -75,7 +75,7 @@ namespace QLearning
             
             if (pickupScript)
             {
-                pickupScript.Init((PickupType)type);
+                pickupScript.Init(type);
             }
             
             activePickups.Add(pickup);

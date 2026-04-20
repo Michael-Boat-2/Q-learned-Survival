@@ -142,9 +142,9 @@ namespace QLearning
 
             var survivalWeight = Mathf.Min(1f, _survivalTime / 30f);
             
-            var successWeight = Mathf.Min(1f, SuccessStreak / 5f);
+            var successWeight = Mathf.Min(1f, SuccessStreak / 2f);
             
-            Engagement = survivalWeight * 0.3f + ammoWeight * 0.2f + successWeight * 0.5f;
+            Engagement = survivalWeight * 0.3f + ammoWeight * 0.1f + successWeight * 0.6f;
             
         }
 
@@ -154,7 +154,7 @@ namespace QLearning
             
             var stressWeight = Mathf.Min(1f, Stress / 5f);
             
-            Fatigue = stressWeight + 0.5f +  survivalWeight;
+            Fatigue = stressWeight * 0.5f +  survivalWeight * 0.5f;
             
         }
 
