@@ -27,6 +27,8 @@ namespace QLearning
         {
             navMeshAgent = GetComponent<NavMeshAgent>();
             
+            targetAgent = GameObject.FindGameObjectWithTag("Player").transform;
+            
         }
 
 

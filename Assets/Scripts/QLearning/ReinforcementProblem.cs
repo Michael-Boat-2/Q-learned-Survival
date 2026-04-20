@@ -6,6 +6,7 @@ namespace QLearning
     public class ReinforcementProblem : MonoBehaviour
     {
         
+        [Header("Agent Stats")]
         [SerializeField] private Transform agentTransform;
         [SerializeField] private float moveSpeed = 5f;
         [SerializeField] private float currentHealth = 100f;
@@ -13,27 +14,34 @@ namespace QLearning
         [SerializeField] private int currentAmmo = 6;
         [SerializeField] private int maxAmmo = 6;
       
+        [SerializeField] private GameObject shootDisplay;
      
-        [SerializeField]private float shotRange = 15f;
-        [SerializeField]private float fireRate = 2f;
+        [SerializeField]private float shotRange;
+        [SerializeField]private float fireRate;
+        
+        [Header("Agent Discrete Thresholds")]
         
         //Health threshold
-        [SerializeField] private float criticalHealth = 0.3f;
-        [SerializeField] private float hurtHealth = 0.6f;
+        [SerializeField] private float criticalHealth;
+        [SerializeField] private float hurtHealth;
         
         //Distance threshold
-        [SerializeField] private float nearDistance = 5f;
-        [SerializeField] private float mediumDistance = 12f;
-        
+        [SerializeField] private float nearDistance;
+        [SerializeField] private float mediumDistance;
+
+
+        [Header("Rewards")]
         //Rewards
-        [SerializeField] private float survivalReward = 0.01f;
-        [SerializeField] private float healthGainReward = 0.5f;
-        [SerializeField] private float healthLossPenalty = 0.3f;
-        [SerializeField] private float ammoPickupReward = 0.4f;
-        [SerializeField] private float killReward = 1.0f;
-        [SerializeField] private float deathPenalty = 5.0f;
+        [SerializeField]
+        private float survivalReward;
+        [SerializeField] private float healthGainReward;
+        [SerializeField] private float healthLossPenalty;
+        [SerializeField] private float ammoPickupReward;
+        [SerializeField] private float killReward;
+        [SerializeField] private float deathPenalty;
 
 
+        [Header("Player Model")]
         [SerializeField] private PlayerModel player;
         
         private Vector3 startPosition;

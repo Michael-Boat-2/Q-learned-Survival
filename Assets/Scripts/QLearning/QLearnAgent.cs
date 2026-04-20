@@ -1,11 +1,18 @@
 using UnityEngine;
 using System.Collections.Generic;
 using UnityEngine.Serialization;
+using System.Text;
+using System.IO;
 
 namespace QLearning
 {
     public class QLearnAgent:MonoBehaviour
     {
+        
+        //Director and player
+        [SerializeField] private PlayerModel playerModel;
+        [SerializeField] private AIDirector aiDirector;
+        
         
         //needs a reinforcement problem
         [SerializeField]private ReinforcementProblem problem;
@@ -30,12 +37,13 @@ namespace QLearning
         private float _totalEpisodeRewards = 0f;
         
         
-        //debugging
-        [SerializeField] private bool logProgress = true;
-        [SerializeField] private int logInterval = 100;
-        
         //reference to store for Q values
         [SerializeField]private QValueStore store;
+        
+        
+        //Analysis
+        [SerializeField] private int logInterval = 100;
+        private StringBuilder trainingLog = new StringBuilder();
         
         
         //Current state
@@ -66,7 +74,8 @@ namespace QLearning
                 Debug.Log("Training completed");
                 isTraining = false;
                 
-                //Store information somehow
+                //Store information
+                StoreTrainingData();
                 return;
             }
             
@@ -94,13 +103,28 @@ namespace QLearning
             _totalEpisodeRewards = 0f;
             currentState = problem.GetCurrentState();
             isDead = false;
+            
+            
+            playerModel.Clear();
+            aiDirector.Clear();
+            
         }
         
         
         private void EndEpisode()
         {
             _episodesCompleted++;
-         
+            
+            //Log information about training
+            //Record data at intervals
+            if (_episodesCompleted % logInterval == 0)
+            {
+                trainingLog.AppendLine($"{_episodesCompleted},{_episodeTimer:F1},{_totalEpisodeRewards:F2}");
+                Debug.Log($"Episode: {_episodesCompleted}, Survival Time: {_episodeTimer:F1}, Rewards Gained: {_totalEpisodeRewards:F2}");
+            }
+            
+            
+            
             StartNewEpisode();
         }
         
@@ -129,6 +153,7 @@ namespace QLearning
 
             //perform action and retrieve the reward and new state
             var (reward, newState) = problem.TakeActions(state, action);
+            _totalEpisodeRewards += reward;
                 
             //Get the current q from store
             float Q = store.GetQValue(state, action);
@@ -211,6 +236,19 @@ namespace QLearning
                 return new Action(Action.ActionType.Flee);
                 
             return actions[Random.Range(0, actions.Count)];
+        }
+
+        private void StoreTrainingData()
+        {
+            if (trainingLog.Length > 0)
+            {
+                string path = Path.Combine(Application.streamingAssetsPath, "q_learn_data.csv");
+                string header = "Episode,SurvivalTime,TotalReward \n";
+                
+                File.WriteAllText(path, header + trainingLog.ToString());
+                Debug.Log($"Stored at {path}");
+
+            }
         }
         
    
