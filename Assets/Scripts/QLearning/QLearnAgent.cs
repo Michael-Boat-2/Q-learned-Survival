@@ -49,6 +49,7 @@ namespace QLearning
         //Current state
         private State currentState;
         private bool isDead = false;
+        
 
 
         private void Start()
@@ -80,7 +81,6 @@ namespace QLearning
             }
             
             //end after 30 seconds, or when player dies
-            //TODO have problem is Dead call End Episode
             if (problem.IsDead() || _episodeTimer >= episodeTimeout)
             {
                 EndEpisode();
@@ -130,7 +130,6 @@ namespace QLearning
         
         private void QLearning()
         {
-           
             
             //has a current state
             State state = problem.GetCurrentState();

@@ -92,7 +92,7 @@ namespace QLearning
             {
                 float x = Random.Range(-spawnAreaSize.x / 2f, spawnAreaSize.x / 2f);
                 float z = Random.Range(-spawnAreaSize.y / 2f, spawnAreaSize.y / 2f);
-                return transform.position + new Vector3(x, 1f, z);
+                return transform.position + new Vector3(x, 0, z);
             }
         }
         

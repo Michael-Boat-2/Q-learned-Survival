@@ -1,5 +1,6 @@
 using System;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 namespace QLearning
 {
@@ -14,8 +15,9 @@ namespace QLearning
             Hard,
             AI
         }
-        
-        public Difficulty Level {get;set;}
+
+
+        [SerializeField] private Difficulty level;
         
         //Maintain Tension Curve
         [SerializeField]private float targetTension = 0.65f;
@@ -78,7 +80,7 @@ namespace QLearning
             CheckTension();
             
             //Switch Difficulty
-            switch (Level)
+            switch (level)
             {
                 case Difficulty.Easy:
                     
@@ -149,7 +151,7 @@ namespace QLearning
             ChangeRates();
             
             
-            if (hasScriptedEvent && Level == Difficulty.AI)
+            if (hasScriptedEvent && level == Difficulty.AI)
             {
                 _eventTimer -= Time.deltaTime;
                 
@@ -219,7 +221,7 @@ namespace QLearning
             else if (currentTension < 0.3f && _episodeTimer > 15f)
             {
                 //spawn up to 6 zombies at once if tension is low
-                zSpawner.SpawnWave(6);
+                zSpawner.SpawnWave(3);
                 _eventTimer = eventCooldown;
                 
             }

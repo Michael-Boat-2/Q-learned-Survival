@@ -10,10 +10,10 @@ namespace QLearning
         [SerializeField] private NavMeshAgent navMeshAgent;
         [SerializeField] private Transform targetAgent;
 
-        [SerializeField] private float health = 100f;
+        [SerializeField] private float health;
         
-        [SerializeField] private float attackDistance;
-        [SerializeField] private float attackDamage;
+        [SerializeField] private float attackDistance = 1.5f;
+        [SerializeField] private float attackDamage = 20f;
         [SerializeField]private float attackCooldown = 1.5f;
 
         [SerializeField] private float rotationSpeed = 5f;
@@ -47,8 +47,10 @@ namespace QLearning
 
 
             if (!targetAgent) return;
+            
+            Chase();
         
-            var distance = Vector3.Distance(transform.position, targetAgent.transform.position);
+            /*var distance = Vector3.Distance(transform.position, targetAgent.transform.position);
 
             if (distance < attackDistance)
             {
@@ -57,7 +59,7 @@ namespace QLearning
             else
             {
                 Chase();
-            }
+            }*/
         }
 
 
@@ -82,7 +84,11 @@ namespace QLearning
                 var rp = collision.gameObject.GetComponent<ReinforcementProblem>();
                 if (rp != null)
                 {
+                    
+                   
                     rp.TakeDamage(attackDamage);
+                    
+                   
                     attackCooldownTimer = attackCooldown;
                 }
             }

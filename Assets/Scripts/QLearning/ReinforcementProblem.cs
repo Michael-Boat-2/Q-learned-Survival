@@ -1,5 +1,7 @@
 using UnityEngine;
 using System.Collections.Generic;
+using UnityEngine.AI;
+
 
 namespace QLearning
 {
@@ -7,6 +9,8 @@ namespace QLearning
     {
         
         [Header("Agent Stats")]
+        [SerializeField] private NavMeshAgent navAgent;
+        
         [SerializeField] private Transform agentTransform;
         [SerializeField] private float moveSpeed = 5f;
         [SerializeField] private float currentHealth = 100f;
@@ -136,6 +140,7 @@ namespace QLearning
                 
                 case Action.ActionType.HoldPosition:
                     //will do nothing and stand
+                    Move(this.transform.position);
                     break;
                 
                 
@@ -170,14 +175,24 @@ namespace QLearning
         
         private void Move(Vector3 target)
         {
-            Vector3 direction = (target - agentTransform.position).normalized;
-            agentTransform.position += direction * moveSpeed * Time.fixedDeltaTime;
+            
+            navAgent.SetDestination(target);
+            
+            
+            
+            /*Vector3 direction = (target - agentTransform.position).normalized;
+            Vector3 oldPosition = agentTransform.position;
+            
+            agentTransform.position += direction * moveSpeed * Time.deltaTime;*/
+            
         }
         
         
         
         private void Shoot(GameObject target)
         {
+            //Stops
+            navAgent.SetDestination(transform.position);
             
             float distance = Vector3.Distance(agentTransform.position, target.transform.position);
             if (distance < shotRange)
