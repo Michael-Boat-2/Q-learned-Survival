@@ -83,34 +83,88 @@ namespace QLearning
             switch (Level)
             {
                 case Difficulty.Easy:
-
+                    
+                    //More pickups, less spawn
+                    spawnRate = 0.5f;
+                    pickupRate = 1.5f;
+                    rewardScaler = 1.5f;
+                    
                     break;
                 
                 case Difficulty.Baseline:
+
+                    spawnRate = 1f;
+                    pickupRate = 1f;
+                    rewardScaler = 1f;
+                    
                     break;
                 
                 case Difficulty.Hard:
+
+                    spawnRate = 1.5f;
+                    pickupRate = 0.5f;
+                    rewardScaler = 0.8f;
+                    
                     break;
                 
                 case Difficulty.AI:
+
+                    var adjThreshold = 0.05f;
+
+                    //if tension is too high
+                    if (currentTension - targetTension > adjThreshold)
+                    {
+                        //Lerp to gradually spawn adjust rate 
+                        spawnRate = Mathf.Lerp(spawnRate, 0.5f, 0.1f * Time.deltaTime);
+                        pickupRate = 1.2f;
+                        
+                        //Rest when tension is too high
+                        if (currentTension > 0.8f && !_isRestTriggered)
+                        {
+                            TriggerRest();
+                        }
+                        
+                        
+                    }
+                    else if (currentTension - targetTension < -adjThreshold)
+                    {
+                        
+                        spawnRate = Mathf.Lerp(spawnRate, 1.5f, 0.1f * Time.deltaTime );
+                        pickupRate = 0.8f;
+                       
+
+                    }
+                    else
+                    {
+                        spawnRate = Mathf.Lerp(spawnRate, 1f, 0.1f * Time.deltaTime);
+                        pickupRate = 1f;
+                       
+                    }
+                    
+                    rewardScaler = 0.8f + (1 - currentTension) * 0.4f;
+                    
                     break;
                 
             }
             
-            //Change Game Settings Accordingly
+            //Change Game Settings According to difficulty
+            ChangeRates();
             
             
             if (hasScriptedEvent)
             {
                 _eventTimer += Time.deltaTime;
                 
-                //See if can perform
-                
+                //See if can perform events to adjust tension
                 
             }
             
             
         }
+        
+        
+        
+        
 
         public float GetTension()
         {
@@ -137,21 +191,31 @@ namespace QLearning
         }
 
 
-        private void AdjustTension()
+        private void ChangeRates()
         {
+            zSpawner.SetSpawnRate(spawnRate);
+            pSpawner.SetSpawnRate(pickupRate);
+            agent.SetRewardScale(rewardScaler);
+        }
+
+
+        private void TriggerRest()
+        {
+            _isRestTriggered = true;
+            
+            zSpawner.TriggerRestPeriod(5f);
             
         }
-        
+       
         
         
         public void Clear()
         {
             _episodeTimer = 0f;
             _eventTimer = 0f;
-            _restTriggered = false;
-            spawnRateMultiplier = 1f;
-            pickupRateMultiplier = 1f;
-            rewardScaleMultiplier = 1f;
+            
+            _isRestTriggered = false;
+           
         }
         
         

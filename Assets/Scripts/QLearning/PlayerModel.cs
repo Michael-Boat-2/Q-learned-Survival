@@ -119,7 +119,7 @@ namespace QLearning
         private void UpdateEnemyDensity()
         {
             //Use spawner to count
-            EnemyDensity = spawner.GetDensity();
+            EnemyDensity = spawner.GetZombieDensity();
         }
     
 

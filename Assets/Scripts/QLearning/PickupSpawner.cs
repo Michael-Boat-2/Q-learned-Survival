@@ -3,73 +3,79 @@ using System.Collections.Generic;
 
 namespace QLearning
 {
+    
+    
     public class PickupSpawner : MonoBehaviour
     {
-        public enum PickupType
-        {
-            Health,
-            Ammo
-        }
         
-        [Header("Prefabs")]
         [SerializeField] private GameObject healthPickupPrefab;
         [SerializeField] private GameObject ammoPickupPrefab;
         
-        [Header("Spawn Settings")]
         [SerializeField] private Transform[] spawnPoints;
         [SerializeField] private float baseSpawnInterval = 8f;
         [SerializeField] private int maxPickups = 4;
         [SerializeField] private Vector2 spawnAreaSize = new Vector2(15f, 15f);
         
-        [Header("Runtime")]
-        [SerializeField] private float spawnMultiplier = 1f;
+        
+        [SerializeField] private float spawnRate = 1f;
         [SerializeField] private List<GameObject> activePickups = new List<GameObject>();
         
         private float _spawnTimer;
-        private Transform _player;
+        [SerializeField]private Transform player;
         
         private void Start()
         {
-            _player = GameObject.FindGameObjectWithTag("Player")?.transform;
+            if (!player)
+            {
+                player = GameObject.FindGameObjectWithTag("Player")?.transform;
+            }
+           
         }
         
         private void Update()
         {
-            // Clean up collected pickups
-            activePickups.RemoveAll(p => p == null);
+            // Remove collected pickups
+            activePickups.RemoveAll(pickUp => pickUp == null);
             
             if (activePickups.Count >= maxPickups) return;
             
             _spawnTimer -= Time.deltaTime;
-            if (_spawnTimer <= 0f)
-            {
-                // Randomly choose pickup type (60% health, 40% ammo)
-                PickupType type = Random.value < 0.6f ? PickupType.Health : PickupType.Ammo;
-                SpawnPickup(type);
+
+            if (!(_spawnTimer <= 0f)) return;
+            
+            var type = Random.value < 0.6f ? PickupType.Health : PickupType.Ammo;
                 
-                float interval = baseSpawnInterval / spawnMultiplier;
-                _spawnTimer = Mathf.Max(2f, interval);
-            }
+            SpawnPickup(type);
+                
+            var interval = baseSpawnInterval / spawnRate;
+            _spawnTimer = interval < 2f ? 2f : interval;
         }
         
         private void SpawnPickup(PickupType type)
         {
-            GameObject prefab = type == PickupType.Health ? healthPickupPrefab : ammoPickupPrefab;
-            
-            if (prefab == null)
+
+            GameObject prefab;
+            if (type == PickupType.Health)
             {
-                Debug.LogWarning($"PickupSpawner: No prefab for {type}!");
-                return;
+                prefab = healthPickupPrefab;
+            }
+            else
+            {
+                prefab = ammoPickupPrefab;
             }
             
-            Vector3 spawnPos = GetSpawnPosition();
-            GameObject pickup = Instantiate(prefab, spawnPos, Quaternion.identity);
             
-            // Configure the pickup
+            if (!prefab) return;
+         
+            var spawnPos = GetSpawnPosition();
+            var pickup = Instantiate(prefab, spawnPos, Quaternion.identity);
+            
+          
             var pickupScript = pickup.GetComponent<Pickup>();
-            if (pickupScript != null)
+            
+            if (pickupScript)
             {
-                pickupScript.Initialize(type);
+                pickupScript.Init((PickupType)type);
             }
             
             activePickups.Add(pickup);
@@ -86,24 +92,16 @@ namespace QLearning
             {
                 float x = Random.Range(-spawnAreaSize.x / 2f, spawnAreaSize.x / 2f);
                 float z = Random.Range(-spawnAreaSize.y / 2f, spawnAreaSize.y / 2f);
-                return transform.position + new Vector3(x, 0f, z);
+                return transform.position + new Vector3(x, 1f, z);
             }
         }
         
-        public void SetSpawnMultiplier(float multiplier)
+        public void SetSpawnRate(float rate)
         {
-            spawnMultiplier = Mathf.Max(0.1f, multiplier);
+            spawnRate = rate;
         }
         
-        public void SpawnHealthPack()
-        {
-            SpawnPickup(PickupType.Health);
-        }
         
-        public void SpawnAmmoPack()
-        {
-            SpawnPickup(PickupType.Ammo);
-        }
         
         private void OnDrawGizmosSelected()
         {
