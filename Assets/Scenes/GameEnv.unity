@@ -170,7 +170,7 @@ MonoBehaviour:
   - {fileID: 1364725034}
   - {fileID: 1057659684}
   baseSpawnInterval: 5
-  maxZombies: 5
+  maxZombies: 8
   spawnAreaSize: {x: 25, y: 25}
   minDistanceFromPlayer: 5
   spawnRate: 1
@@ -335,15 +335,16 @@ MonoBehaviour:
   playerModel: {fileID: 115344530}
   aiDirector: {fileID: 917447353}
   problem: {fileID: 115344531}
-  iterations: 1000
+  totalEpisodes: 500
   alpha: 0.3
   gamma: 0.75
   rho: 0.1
   isTraining: 1
   decisionPeriod: 0.2
   episodeTimeout: 30
+  timeScale: 50
   store: {fileID: 115344529}
-  logInterval: 100
+  logInterval: 25
 --- !u!114 &115344529
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1081,7 +1082,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 61a0980ed99e4c0890e2dcd79535c2da, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  level: 1
+  level: 2
   targetTension: 0.65
   currentTension: 0
   player: {fileID: 115344530}

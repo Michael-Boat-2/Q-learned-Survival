@@ -18,8 +18,9 @@ namespace QLearning
         [SerializeField]private ReinforcementProblem problem;
         
         //iterations
-        [SerializeField] private int iterations = 1000;
-        private int _currentIteration = 0;
+        //[SerializeField] private int iterations = 1000;
+        //private int _currentIteration = 0;
+        [SerializeField] private int totalEpisodes = 500;
         
         [SerializeField] private float alpha = 0.3f;
         [SerializeField] private float gamma = 0.75f;
@@ -32,6 +33,9 @@ namespace QLearning
          private float _decisionTimer = 0f;
          
         [SerializeField] private float episodeTimeout = 30f;
+
+        [SerializeField] private float timeScale;
+        
         private float _episodeTimer = 0f;
         private int _episodesCompleted = 0;
         private float _totalEpisodeRewards = 0f;
@@ -42,8 +46,9 @@ namespace QLearning
         
         
         //Analysis
-        [SerializeField] private int logInterval = 100;
+        [SerializeField] private int logInterval = 25;
         private StringBuilder trainingLog = new StringBuilder();
+        
         
         
         //Current state
@@ -54,6 +59,10 @@ namespace QLearning
 
         private void Start()
         {
+            
+            Time.timeScale = timeScale;
+            
+            
             if (problem)
             {
                 StartNewEpisode();
@@ -70,7 +79,7 @@ namespace QLearning
             _decisionTimer += Time.deltaTime;
             
             //Check if training has completed
-            if (_currentIteration >= iterations)
+            if (_episodesCompleted >= totalEpisodes)
             {
                 Debug.Log("Training completed");
                 isTraining = false;
@@ -168,7 +177,7 @@ namespace QLearning
                 
             //update state
             currentState = newState;
-            _currentIteration++;
+            //_currentIteration++;
             
         }
         
@@ -241,7 +250,7 @@ namespace QLearning
         {
             if (trainingLog.Length > 0)
             {
-                string path = Path.Combine(Application.streamingAssetsPath, "q_learn_data.csv");
+                string path = Path.Combine(Application.streamingAssetsPath, "q_learn_hard.csv");
                 string header = "Episode,SurvivalTime,TotalReward \n";
                 
                 File.WriteAllText(path, header + trainingLog.ToString());
