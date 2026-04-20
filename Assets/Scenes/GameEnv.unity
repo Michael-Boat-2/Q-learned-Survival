@@ -1082,7 +1082,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 61a0980ed99e4c0890e2dcd79535c2da, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  level: 2
+  level: 3
   targetTension: 0.65
   currentTension: 0
   player: {fileID: 115344530}
