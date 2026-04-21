@@ -23,7 +23,7 @@ namespace QLearning
 
         public string StateString()
         {
-            return $"{EnemyProximity}_{AmmoStatus}_{HealthStatus}";
+            return $"{EnemyProximity},{AmmoStatus},{HealthStatus}";
         }
         
         

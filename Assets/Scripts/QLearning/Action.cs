@@ -8,7 +8,7 @@ namespace QLearning
             HoldPosition,
             Flee,    
             MoveToPickup,   
-            Shoot   
+            Shoot    
         }
         
         public ActionType Type{ get; set; }

@@ -250,7 +250,7 @@ namespace QLearning
         {
             if (trainingLog.Length > 0)
             {
-                string path = Path.Combine(Application.streamingAssetsPath, "q_learn_ai.csv");
+                string path = Path.Combine(Application.streamingAssetsPath, "q_learn_build.csv");
                 string header = "Episode,SurvivalTime,TotalReward \n";
                 
                 File.WriteAllText(path, header + trainingLog.ToString());

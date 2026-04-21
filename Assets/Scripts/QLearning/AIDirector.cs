@@ -165,7 +165,6 @@ namespace QLearning
         
         
         
-        
 
         public float GetTension()
         {
