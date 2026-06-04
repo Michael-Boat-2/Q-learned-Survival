@@ -333,15 +333,15 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   loadSavedModel: 0
-  modelFileName: hardTrained
-  csvTrainedName: hardTrained
+  modelFileName: newAdaptive
+  csvTrainedName: newAdaptive
   playerModel: {fileID: 115344530}
   aiDirector: {fileID: 917447353}
   problem: {fileID: 115344531}
   totalEpisodes: 1000
   alpha: 0.3
-  gamma: 0.2
-  rho: 0.2
+  gamma: 0.75
+  rho: 0.1
   isTraining: 1
   decisionPeriod: 0.2
   episodeTimeout: 30
@@ -360,7 +360,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 25d2226d10a8f7a40b2704c004524fe8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  trainedFileName: trained
 --- !u!114 &115344530
 MonoBehaviour:
   m_ObjectHideFlags: 0
