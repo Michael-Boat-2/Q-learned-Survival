@@ -332,17 +332,20 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 28a7e7c399814c5e888acdd63d3dcf33, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  loadSavedModel: 0
+  modelFileName: hardTrained
+  csvTrainedName: hardTrained
   playerModel: {fileID: 115344530}
   aiDirector: {fileID: 917447353}
   problem: {fileID: 115344531}
-  totalEpisodes: 250
+  totalEpisodes: 1000
   alpha: 0.3
   gamma: 0.2
   rho: 0.2
   isTraining: 1
   decisionPeriod: 0.2
   episodeTimeout: 30
-  timeScale: 20
+  timeScale: 50
   store: {fileID: 115344529}
   logInterval: 25
 --- !u!114 &115344529
@@ -357,6 +360,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 25d2226d10a8f7a40b2704c004524fe8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  trainedFileName: trained
 --- !u!114 &115344530
 MonoBehaviour:
   m_ObjectHideFlags: 0

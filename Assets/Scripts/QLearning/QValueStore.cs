@@ -1,5 +1,6 @@
 using UnityEngine;
 using System.Collections.Generic;
+using System.IO;
 
 namespace QLearning
 {
@@ -10,6 +11,7 @@ namespace QLearning
         private const int ActionsBuffer = 4;
         
         
+        
         public QValueStore()
         {
             //create qTable indexed by states and action number in buffer
@@ -17,6 +19,10 @@ namespace QLearning
             
             InitQTable();
         }
+
+
+    
+        
         
         private void InitQTable()
         {
@@ -87,5 +93,84 @@ namespace QLearning
             
             qTable[key][(int)action.Type] = qValue;
         }
+        
+        
+        
+        
+        
+        [System.Serializable]
+        private class QTableEntry
+        {
+            public string stateKey;
+            public float[] values;
+        }
+
+
+        [System.Serializable]
+        private class QTableData
+        {
+            public List<QTableEntry> entries;
+        }
+        
+
+        public void SaveToFile(string filename)
+        {
+            var entries = new List<QTableEntry>();
+
+            foreach (var state in qTable)
+            {
+                entries.Add(new QTableEntry{stateKey = state.Key,values = state.Value});
+            }
+            
+            
+            QTableData data = new QTableData{entries = entries};
+            var json = JsonUtility.ToJson(data, true);
+            
+            var path = Path.Combine(Application.streamingAssetsPath, filename + ".json");
+
+            if (File.Exists(path))
+            {
+                File.Delete(path);
+            }
+            
+            File.WriteAllText(path, json);
+            
+            Debug.Log($"QValueStore saved to {path}");
+            
+        }
+
+
+        public void LoadFromFile(string filename)
+        {
+            string path = Path.Combine(Application.streamingAssetsPath, filename + ".json");
+
+            if (File.Exists(path))
+            {
+                var json = File.ReadAllText(path);
+                var data = JsonUtility.FromJson<QTableData>(json);
+                
+                //clear old q-table
+                
+                //populate it with everything it needs
+                
+                qTable.Clear();
+
+                foreach (var entry in data.entries)
+                {
+                    qTable[entry.stateKey] = entry.values;
+                }
+                
+                Debug.Log("QValueStore: Loaded " + data.entries.Count + " entries.");
+            }
+            else
+            {
+                Debug.LogError("QValueStore: File not found: " + filename);
+            }
+            
+        }
+        
+        
+        
+        
     }
 }

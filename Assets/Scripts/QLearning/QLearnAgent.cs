@@ -9,6 +9,13 @@ namespace QLearning
     public class QLearnAgent:MonoBehaviour
     {
         
+        
+        //Inference Mode
+        [SerializeField] private bool loadSavedModel = false;
+        [SerializeField] private string modelFileName = "trained";
+        [SerializeField] private string csvTrainedName = "trained";
+        
+        
         //Director and player
         [SerializeField] private PlayerModel playerModel;
         [SerializeField] private AIDirector aiDirector;
@@ -61,6 +68,25 @@ namespace QLearning
         {
             
             Time.timeScale = timeScale;
+
+
+            if (loadSavedModel)
+            {
+                
+                //Watch in normal timescale
+                Time.timeScale = 1f;
+                
+                //load an old model 
+                store.LoadFromFile(modelFileName);
+                isTraining = false;
+
+                //No exploration, just exploitation
+                rho = 0f;
+                Debug.Log("Running a trained inference Model");
+                
+
+            }
+            
             
             
             if (problem)
@@ -250,11 +276,20 @@ namespace QLearning
         {
             if (trainingLog.Length > 0)
             {
-                string path = Path.Combine(Application.streamingAssetsPath, "q_learn_build.csv");
+                string path = Path.Combine(Application.streamingAssetsPath, csvTrainedName + ".csv");
                 string header = "Episode,SurvivalTime,TotalReward \n";
+
+                if (File.Exists(path))
+                {
+                    File.Delete(path);
+                }
                 
                 File.WriteAllText(path, header + trainingLog.ToString());
                 Debug.Log($"Stored at {path}");
+                
+                
+                store.SaveToFile(modelFileName);
+                
 
             }
         }
