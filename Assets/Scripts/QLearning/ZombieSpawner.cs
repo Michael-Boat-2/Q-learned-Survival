@@ -64,6 +64,18 @@ namespace QLearning
             
         }
         
+        
+        public void ClearAllZombies()
+        {
+            foreach (var zombie in activeZombies)
+            {
+                if (zombie != null)
+                    Destroy(zombie);
+            }
+            activeZombies.Clear();
+            _spawnTimer = 0f;   // optional: force a spawn soon after reset
+        }
+        
         private void SpawnZombie()
         {
             if (!zombiePrefab) { return; }

@@ -134,6 +134,7 @@ namespace QLearning
         private void StartNewEpisode()
         {
             problem.ResetAgent();
+            FindFirstObjectByType<ZombieSpawner>()?.ClearAllZombies();
             _episodeTimer = 0f;
             _totalEpisodeRewards = 0f;
             currentState = problem.GetCurrentState();
@@ -154,7 +155,7 @@ namespace QLearning
             //Record data at intervals
             if (_episodesCompleted % logInterval == 0)
             {
-                trainingLog.AppendLine($"{_episodesCompleted},{_episodeTimer:F1},{_totalEpisodeRewards:F2}");
+                trainingLog.AppendLine($"{_episodesCompleted}];{_episodeTimer:F1};{_totalEpisodeRewards:F2}");
                 Debug.Log($"Episode: {_episodesCompleted}, Survival Time: {_episodeTimer:F1}, Rewards Gained: {_totalEpisodeRewards:F2}");
             }
             
@@ -277,7 +278,7 @@ namespace QLearning
             if (trainingLog.Length > 0)
             {
                 string path = Path.Combine(Application.streamingAssetsPath, csvTrainedName + ".csv");
-                string header = "Episode,SurvivalTime,TotalReward \n";
+                string header = "Episode;SurvivalTime;TotalReward \n";
 
                 if (File.Exists(path))
                 {
