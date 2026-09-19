@@ -68,6 +68,7 @@ namespace QLearning
         private void Start()
         {
             //Level = Difficulty.AI;
+            Debug.Log($"AI Director starting in {level} mode");
         }
 
 

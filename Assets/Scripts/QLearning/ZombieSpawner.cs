@@ -125,7 +125,9 @@ namespace QLearning
             foreach (var zombie in activeZombies)
             {
                 var z = zombie.GetComponent<ZombieAI>();
-                z.TakeDamage(100f);
+                
+                //make sure these zombie kills dont affect player engagement model
+                z.TakeDamage(100f, countAsPlayerKill:false);
             }
         }
         

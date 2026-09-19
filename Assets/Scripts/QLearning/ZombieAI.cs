@@ -110,17 +110,17 @@ namespace QLearning
             transform.rotation = Quaternion.Slerp(transform.rotation, rotation, rotationSpeed );  
         }
         
-        public void TakeDamage(float amount)
+        public void TakeDamage(float amount, bool countAsPlayerKill = true)
         {
             health -= amount;
             if (!(health <= 0)) return;
-            
-            var playerModel = GameObject.FindFirstObjectByType<PlayerModel>();
-            if (playerModel)
+
+            if (countAsPlayerKill)
             {
-                playerModel.UpdateKills();
+                var playerModel = GameObject.FindFirstObjectByType<PlayerModel>();
+                if (playerModel)  playerModel.UpdateKills();
             }
-                
+         
             Destroy(gameObject);
 
         }
