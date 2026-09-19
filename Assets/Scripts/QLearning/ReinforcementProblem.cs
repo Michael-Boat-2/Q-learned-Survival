@@ -211,10 +211,13 @@ namespace QLearning
         }
 
 
+        /*
         public void SetRewardScale(float scale)
         {
-            rewardScale = scale < 0.1f ? 0.1f : scale;
+            //fixed to 1.0f, no more reward scaling
+            rewardScale = 1.0f;
         }
+        */
         
         
         //Reward Function
@@ -247,8 +250,8 @@ namespace QLearning
             // Death penalty
             if (currentHealth <= 0) reward -= deathPenalty;
             
-            //director scales reward
-            return reward * rewardScale; ;
+            // no more reward scaling
+            return reward;
             
         }
         

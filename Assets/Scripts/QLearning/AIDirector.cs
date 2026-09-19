@@ -141,7 +141,7 @@ namespace QLearning
                        
                     }
                     
-                    rewardScaler = 0.8f + (1 - currentTension) * 0.4f;
+                    //rewardScaler = 0.8f + (1 - currentTension) * 0.4f;
                     
                     break;
                 
@@ -195,7 +195,9 @@ namespace QLearning
         {
             zSpawner.SetSpawnRate(spawnRate);
             pSpawner.SetSpawnRate(pickupRate);
-            agent.SetRewardScale(rewardScaler);
+            
+            //no longer scaling rewards
+            //agent.SetRewardScale(rewardScaler);
         }
 
 
