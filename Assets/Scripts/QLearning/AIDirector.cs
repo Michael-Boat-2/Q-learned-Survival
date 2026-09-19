@@ -87,7 +87,7 @@ namespace QLearning
                     //More pickups, less spawn
                     spawnRate = 0.5f;
                     pickupRate = 1.5f;
-                    rewardScaler = 1.5f;
+                    //rewardScaler = 1.5f;
                     
                     break;
                 
@@ -95,7 +95,7 @@ namespace QLearning
 
                     spawnRate = 1f;
                     pickupRate = 1f;
-                    rewardScaler = 1f;
+                    //rewardScaler = 1f;
                     
                     break;
                 
@@ -103,7 +103,7 @@ namespace QLearning
 
                     spawnRate = 1.5f;
                     pickupRate = 0.5f;
-                    rewardScaler = 0.8f;
+                    //rewardScaler = 0.8f;
                     
                     break;
                 
