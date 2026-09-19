@@ -235,6 +235,8 @@ namespace QLearning
             _episodeTimer = 0f;
             _eventTimer = 0f;
             
+            currentTension = 0f;
+            
             _isRestTriggered = false;
            
         }

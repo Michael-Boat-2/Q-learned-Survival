@@ -438,6 +438,7 @@ namespace QLearning
             prevHealth = currentHealth;
             prevAmmo = currentAmmo;
             zombieKilled = false;
+            fireTimer = 0f;
             
             agentTransform.position = startPosition;
         }

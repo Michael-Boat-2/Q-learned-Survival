@@ -339,15 +339,17 @@ MonoBehaviour:
   aiDirector: {fileID: 917447353}
   problem: {fileID: 115344531}
   totalEpisodes: 500
-  alpha: 0.3
+  alpha: 0.1
   gamma: 0.75
-  rho: 0
+  rho: 0.1
   isTraining: 1
   decisionPeriod: 0.2
   episodeTimeout: 30
   timeScale: 50
   store: {fileID: 115344529}
   logInterval: 25
+  zombieSpawner: {fileID: 41375028}
+  pickupSpawner: {fileID: 491440605}
 --- !u!114 &115344529
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -402,10 +404,10 @@ MonoBehaviour:
   mediumDistance: 9
   survivalReward: 0.02
   healthGainReward: 0.5
-  healthLossPenalty: 0.3
+  healthLossPenalty: 0.5
   ammoPickupReward: 0.4
-  killReward: 1
-  deathPenalty: 5
+  killReward: 2
+  deathPenalty: 3
   player: {fileID: 115344530}
 --- !u!195 &115344532
 NavMeshAgent:

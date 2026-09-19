@@ -101,6 +101,16 @@ namespace QLearning
             spawnRate = rate;
         }
         
+        public void ClearAllPickups()
+        {
+            foreach (var pickup in activePickups)
+            {
+                if (pickup != null) Destroy(pickup);
+            }
+            activePickups.Clear();
+            _spawnTimer = 0f;
+        }
+        
         
         
         private void OnDrawGizmosSelected()

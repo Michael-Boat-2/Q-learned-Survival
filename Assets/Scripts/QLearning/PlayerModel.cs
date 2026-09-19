@@ -172,6 +172,7 @@ namespace QLearning
             FailStreak = 0;
             
             _lastHealth = agent.GetHealth();
+            _currentHealth = agent.GetHealth();
             
         }
         

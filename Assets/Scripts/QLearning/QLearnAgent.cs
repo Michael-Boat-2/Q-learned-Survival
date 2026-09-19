@@ -29,7 +29,7 @@ namespace QLearning
         //private int _currentIteration = 0;
         [SerializeField] private int totalEpisodes = 500;
         
-        [SerializeField] private float alpha = 0.3f;
+        [SerializeField] private float alpha = 0.1f;
         [SerializeField] private float gamma = 0.75f;
         [SerializeField] private float rho = 0.1f;
         //[SerializeField] private float nu = 0.01f;
@@ -61,6 +61,10 @@ namespace QLearning
         //Current state
         private State currentState;
         private bool isDead = false;
+        
+        //spawners
+        [SerializeField] private ZombieSpawner zombieSpawner;
+        [SerializeField] private PickupSpawner pickupSpawner;
         
 
 
@@ -133,8 +137,13 @@ namespace QLearning
         
         private void StartNewEpisode()
         {
+            //resetting problem adequately
+            
             problem.ResetAgent();
-            FindFirstObjectByType<ZombieSpawner>()?.ClearAllZombies();
+            
+            zombieSpawner?.ClearAllZombies();
+            pickupSpawner?.ClearAllPickups();
+            
             _episodeTimer = 0f;
             _totalEpisodeRewards = 0f;
             currentState = problem.GetCurrentState();
@@ -155,7 +164,7 @@ namespace QLearning
             //Record data at intervals
             if (_episodesCompleted % logInterval == 0)
             {
-                trainingLog.AppendLine($"{_episodesCompleted}];{_episodeTimer:F1};{_totalEpisodeRewards:F2}");
+                trainingLog.AppendLine($"{_episodesCompleted};{_episodeTimer:F1};{_totalEpisodeRewards:F2}");
                 Debug.Log($"Episode: {_episodesCompleted}, Survival Time: {_episodeTimer:F1}, Rewards Gained: {_totalEpisodeRewards:F2}");
             }
             
@@ -208,62 +217,7 @@ namespace QLearning
             
         }
         
-        
-        /*//QLearning updates store
-        private void QLearningIter(ReinforcementProblem prob,int iter,float a,float g,float r,float n)
-        {
-            //starting state
-            State state = ReinforcementProblem.GetRandomState();
-            Action action = new Action();
-            
-            
-
-            //Repeat
-            for (int i = 0; i < iter; i++)
-            {
-
-                //if random between 1 and 0 is less than nu
-                if (Random.value < n)
-                {
-                    state = ReinforcementProblem.GetRandomState();
-                }
-                
-                //list of available actions based on state
-                List<Action> actions = prob.GetAvailableActions(state);
-                
-                
-                //use a random action this time?
-                if (Random.value < r)
-                {
-                    action = OneOf(actions);
-                }
-                else
-                {
-                    //or use best action available
-                    action = store.GetBestAction(state);
-                }
-                
-                //perform action and retrieve the reward and new state
-                var (reward, newState) = prob.TakeActions(state, action);
-                
-                //Get the current q from store
-                float Q = store.GetQValue(state, action);
-                
-                //get the q of the best action from the new state
-                float maxQ = store.GetQValue(newState, store.GetBestAction(newState));
-                
-                //Perform the q learning
-                Q = (1 - a) * Q + a * (reward + g * maxQ);
-                
-                //Store the new Q value
-                store.StoreQValue(state,action, Q);
-                
-                //update state
-                state = newState;
-
-            }
-            
-        }*/
+      
         
         private Action OneOf(List<Action> actions)
         {
