@@ -18,6 +18,8 @@ namespace QLearning
 
 
         [SerializeField] private Difficulty level;
+        public Difficulty Level {get => level; set => level = value; }
+        
         
         //Maintain Tension Curve
         [SerializeField]private float targetTension = 0.65f;
@@ -240,6 +242,10 @@ namespace QLearning
             
             _isRestTriggered = false;
            
+            
+            spawnRate = 1f;   
+            pickupRate = 1f;   
+            
         }
         
         

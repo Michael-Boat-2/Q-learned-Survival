@@ -332,6 +332,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 28a7e7c399814c5e888acdd63d3dcf33, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  controlledByExperimentManager: 1
   loadSavedModel: 0
   modelFileName: testRate_baseline_800
   csvTrainedName: testRate_baseline_800
@@ -342,6 +343,7 @@ MonoBehaviour:
   alpha: 0.2
   gamma: 0.75
   rho: 0.1
+  startingRho: 0.1
   isTraining: 1
   decisionPeriod: 0.2
   episodeTimeout: 30
@@ -394,7 +396,6 @@ MonoBehaviour:
   maxHealth: 100
   currentAmmo: 6
   maxAmmo: 6
-  shootDisplay: {fileID: 370196766}
   shotRange: 5
   fireRate: 2
   criticalHealth: 0.3
@@ -1096,7 +1097,7 @@ MonoBehaviour:
   spawnRate: 1
   pickupRate: 1
   rewardScaler: 1
-  hasScriptedEvent: 0
+  hasScriptedEvent: 1
   eventCooldown: 10
   bossZombie: {fileID: 5216269744462922817, guid: 73041ea4777be0048a5039e4e1310685, type: 3}
 --- !u!1 &965152989
@@ -1444,6 +1445,59 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 1014430261}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &1178034138
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1178034140}
+  - component: {fileID: 1178034139}
+  m_Layer: 0
+  m_Name: ExperimentsManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1178034139
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1178034138}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d2aa7636139b00e47b98f10aedfab882, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  agent: {fileID: 115344528}
+  store: {fileID: 115344529}
+  director: {fileID: 917447353}
+  seeds: 2a0000002b0000002c000000
+  difficulties: 00000000010000000200000003000000
+  postRunDelaySeconds: 3
+  currentRun: 
+  runNumber: 0
+  totalRuns: 0
+--- !u!4 &1178034140
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1178034138}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 7.52, y: 1.8800001, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1278488344
 GameObject:
@@ -2832,3 +2886,4 @@ SceneRoots:
   - {fileID: 987158835}
   - {fileID: 1538698819}
   - {fileID: 2016407578}
+  - {fileID: 1178034140}

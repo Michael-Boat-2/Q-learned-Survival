@@ -40,7 +40,7 @@ namespace QLearning
         
         private float _damageThisMinute;
         private float _dmgMinuteTimer;
-        private const float ZombieDamage = 20f;
+        private const float ZombieDamage = 25f;
 
         private float _survivalTime;
         private int _hitsTaken;

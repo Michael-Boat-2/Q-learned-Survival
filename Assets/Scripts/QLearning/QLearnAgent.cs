@@ -10,6 +10,8 @@ namespace QLearning
     public class QLearnAgent:MonoBehaviour
     {
         
+        [Header("Control")]
+        [SerializeField] private bool controlledByExperimentManager = false;
         
         //Inference Mode
         [SerializeField] private bool loadSavedModel = false;
@@ -33,6 +35,7 @@ namespace QLearning
         [SerializeField] private float alpha = 0.2f;
         [SerializeField] private float gamma = 0.75f;
         [SerializeField] private float rho = 0.1f;
+        [SerializeField] private float startingRho = 0.1f;
         //[SerializeField] private float nu = 0.01f;
         
         //training
@@ -63,6 +66,12 @@ namespace QLearning
         private State currentState;
         private bool isDead = false;
         
+        //pending update tracking for Q-learning
+        private State _lastState;
+        private Action _lastAction;
+        private bool _pendingUpdate = false;
+        
+        
         //spawners
         [SerializeField] private ZombieSpawner zombieSpawner;
         [SerializeField] private PickupSpawner pickupSpawner;
@@ -88,10 +97,16 @@ namespace QLearning
                 //No exploration, just exploitation
                 rho = 0f;
                 Debug.Log("Running a trained inference Model");
-                
 
+                return;
+                
             }
             
+            if (controlledByExperimentManager)
+            {
+                Debug.Log("QLearnAgent waiting for ExperimentManager");
+                return;   // Manager will call BeginTraining()
+            }
             
             
             if (problem)
@@ -135,6 +150,32 @@ namespace QLearning
             }
         }
         
+        public bool IsTraining() => isTraining;
+
+        public void SetRunNames(string csvName, string modelName)
+        {
+            csvTrainedName = csvName;
+            modelFileName = modelName;
+        }
+        
+        
+        public void BeginTraining()
+        {
+            // Reset per-run state
+            rho = startingRho;
+            
+            _episodesCompleted = 0;
+            _episodeTimer = 0f;
+            _decisionTimer = 0f;
+            _totalEpisodeRewards = 0f;
+            
+            trainingLog.Clear();
+            isTraining = true;
+    
+            Debug.Log($"QLearnAgent: Beginning training run");
+            StartNewEpisode();
+        }
+        
         
         private void StartNewEpisode()
         {
@@ -149,6 +190,7 @@ namespace QLearning
             _totalEpisodeRewards = 0f;
             currentState = problem.GetCurrentState();
             isDead = false;
+            _pendingUpdate = false;
             
             
             playerModel.Clear();
@@ -159,6 +201,21 @@ namespace QLearning
         
         private void EndEpisode()
         {
+            
+            // applying terminal Q-update for the last action
+            if (_pendingUpdate)
+            {
+                float terminalReward = problem.ComputeIntervalReward();
+                _totalEpisodeRewards += terminalReward;
+
+                float oldQ = store.GetQValue(_lastState, _lastAction);
+                // Terminal state: no future, so no gamma * maxNextQ term
+                float newQ = (1 - alpha) * oldQ + alpha * terminalReward;
+                store.StoreQValue(_lastState, _lastAction, newQ);
+
+                _pendingUpdate = false;
+            }
+            
             _episodesCompleted++;
             
             // epsilon(rho) decay
@@ -179,44 +236,43 @@ namespace QLearning
         private void QLearning()
         {
             
-            //has a current state
+            //observe current state S_t
             State state = problem.GetCurrentState();
-            Action action;
+            //Action action;
             
+            // compute reward accumulated reward from t-1 to t, for action at t - 1
+            float intervalReward = problem.ComputeIntervalReward();
+            _totalEpisodeRewards += intervalReward;
+            
+            
+            //apply pending q-update
+            if (_pendingUpdate)
+            {
+                float oldQ = store.GetQValue(_lastState, _lastAction);
+                float maxNextQ = store.GetQValue(currentState, store.GetBestAction(currentState));
+                float newQ = (1 - alpha) * oldQ + alpha * (intervalReward + gamma * maxNextQ);
+                store.StoreQValue(_lastState, _lastAction, newQ);
+            }
+            
+            //snapshot baselines before choosing/executing to correctly measure effects of action to take
+            problem.SnapshotForReward();
+            
+            
+            //chose action a_t using current state
             
             //list of available actions based on state
             List<Action> actions = problem.GetAvailableActions(state);
+            
+            //use a random action this time?    //or use best action available
+            Action action = (Random.value < rho) ? OneOf(actions) : store.GetBestAction(currentState);
                 
-            //use a random action this time?
-            if (Random.value < rho)
-            {
-                action = OneOf(actions);
-            }
-            else
-            {
-                //or use best action available
-                action = store.GetBestAction(state);
-            }
-
-            //perform action and retrieve the reward and new state
-            var (reward, newState) = problem.TakeActions(state, action);
-            _totalEpisodeRewards += reward;
-                
-            //Get the current q from store
-            float Q = store.GetQValue(state, action);
-                
-            //get the q of the best action from the new state
-            float maxQ = store.GetQValue(newState, store.GetBestAction(newState));
-                
-            //Perform the q learning
-            Q = (1 - alpha) * Q + alpha * (reward + gamma * maxQ);
-                
-            //Store the new Q value
-            store.StoreQValue(state,action, Q);
-                
-            //update state
-            currentState = newState;
-            //_currentIteration++;
+            //execute actions
+            problem.ExecuteAction(action);
+            
+            //save for the next update cycle
+            _lastState = currentState;
+            _lastAction = action;
+            _pendingUpdate = true;
             
         }
         

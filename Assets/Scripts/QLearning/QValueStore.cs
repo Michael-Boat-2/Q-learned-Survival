@@ -20,6 +20,11 @@ namespace QLearning
             InitQTable();
         }
 
+        public void ResetQTable()
+        {
+            qTable.Clear();
+            InitQTable();
+        }
 
     
         

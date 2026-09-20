@@ -18,7 +18,7 @@ namespace QLearning
         [SerializeField] private int currentAmmo = 6;
         [SerializeField] private int maxAmmo = 6;
       
-        [SerializeField] private GameObject shootDisplay;
+        //[SerializeField] private GameObject shootDisplay;
      
         [SerializeField]private float shotRange;
         [SerializeField]private float fireRate;
@@ -59,9 +59,9 @@ namespace QLearning
         private int prevAmmo;
         
         private GameObject nearestZombie;
-        private GameObject nearestPickup;
+        //private GameObject nearestPickup;
 
-        private float rewardScale = 1f;
+        //private float rewardScale = 1f;
         
         private void Start()
         {
@@ -114,26 +114,47 @@ namespace QLearning
             
             return actions;
         }
-        
-        
-        public (float reward, State newState) TakeActions(State state, Action action)
+
+        // reward accumulated since the last snapshot
+        public float ComputeIntervalReward()
+        {
+            return CalculateReward();
+        }
+
+        //reset baselines so next interval measures from now
+        public void SnapshotForReward()
         {
             prevHealth = currentHealth;
             prevAmmo = currentAmmo;
             zombieKilled = false;
-            
-            //Take action
-            ExecuteAction(action);
-            
-            var reward = CalculateReward();
-            State newState = GetCurrentState();
-            
-            return (reward, newState);
         }
         
         
         
-        private void ExecuteAction(Action action)
+        
+        /*
+        public (float reward, State newState) TakeActions(State state, Action action)
+        {
+            //Compute reward for the interval since the last decision
+            var reward = CalculateReward();
+            
+            zombieKilled = false;
+            //Take action
+            ExecuteAction(action);
+            
+            //update baselines for next reward interval
+            prevHealth = currentHealth;
+            prevAmmo = currentAmmo;
+            
+            
+            State newState = GetCurrentState();
+            return (reward, newState);
+        }
+        */
+        
+        
+        //Execute action
+        public void ExecuteAction(Action action)
         {
             switch (action.Type)
             {
@@ -177,9 +198,6 @@ namespace QLearning
         {
             
             navAgent.SetDestination(target);
-            
-            
-            
             /*Vector3 direction = (target - agentTransform.position).normalized;
             Vector3 oldPosition = agentTransform.position;
             
