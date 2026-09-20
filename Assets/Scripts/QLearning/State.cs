@@ -7,7 +7,10 @@ namespace QLearning
         
         public int EnemyProximity { get; set; }   
         public int AmmoStatus { get; set; }     
-        public int HealthStatus { get; set; }   
+        public int HealthStatus { get; set; }  
+        
+        // is it safe to shoot, considering the near zombies
+        //public int ZombieDensity { get; set; }
         
         //public int TimeSinceEncounter { get; set; }
         
@@ -18,6 +21,7 @@ namespace QLearning
             EnemyProximity = enemyDist;
             AmmoStatus = ammo;
             HealthStatus = health;
+           // ZombieDensity = density;
         }
         
 
@@ -37,8 +41,10 @@ namespace QLearning
                 for (var ammo = 0; ammo < 3; ammo++)
                 {
                     for (int health = 0; health < 3; health++)
-                    { 
+                    {
+                       
                         states.Add(new State(distance, ammo, health));
+                        
                     }
                     
                 }

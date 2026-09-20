@@ -32,6 +32,9 @@ namespace QLearning
         //Distance threshold
         [SerializeField] private float nearDistance;
         [SerializeField] private float mediumDistance;
+        
+        //[Header("Density Sensing")]
+        //[SerializeField] private float densityRadius;
 
 
         [Header("Rewards")]
@@ -85,6 +88,7 @@ namespace QLearning
             var zombieDist = GetZombieDistanceCategory();
             var ammo = GetAmmoCategory();
             var health = GetHealthCategory();
+           // var density = GetZombieDensityCategory();
             
             return new State(zombieDist, ammo, health);
         }
@@ -95,6 +99,8 @@ namespace QLearning
             var zombieDist = Random.Range(0, 3);
             var ammo = Random.Range(0, 3);
             var health = Random.Range(0, 3);
+           // var density = Random.Range(0, 3);
+            
             
             return new State(zombieDist, ammo, health);
         }
@@ -302,6 +308,26 @@ namespace QLearning
             // Zombies Too Far
             return 2;                               
         }
+        
+        
+        /*
+        private int GetZombieDensityCategory()
+        {
+            var zombies = GameObject.FindGameObjectsWithTag("Zombie");
+            int nearbyCount = 0;
+
+            foreach (var z in zombies)
+            {
+                if (Vector3.Distance(agentTransform.position, z.transform.position) < densityRadius)
+                    nearbyCount++;
+            }
+
+            if (nearbyCount <= 1) return 0;   // Alone or one zombie — safe
+            if (nearbyCount <= 3) return 1;   // 2–3 zombies — risky
+            return 2;                          // 4+ zombies — dangerous
+        }
+        */
+        
         
         private int GetAmmoCategory()
         {

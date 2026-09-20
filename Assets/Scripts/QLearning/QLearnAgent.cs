@@ -32,8 +32,8 @@ namespace QLearning
         //private int _currentIteration = 0;
         [SerializeField] private int totalEpisodes = 800;
         
-        [SerializeField] private float alpha = 0.2f;
-        [SerializeField] private float gamma = 0.75f;
+        [SerializeField] private float alpha = 0.1f;
+        [SerializeField] private float gamma = 0.8f;
         [SerializeField] private float rho = 0.1f;
         [SerializeField] private float startingRho = 0.1f;
         //[SerializeField] private float nu = 0.01f;
@@ -63,7 +63,7 @@ namespace QLearning
         
         
         //Current state
-        private State currentState;
+        //private State currentState;
         private bool isDead = false;
         
         //pending update tracking for Q-learning
@@ -188,7 +188,7 @@ namespace QLearning
             
             _episodeTimer = 0f;
             _totalEpisodeRewards = 0f;
-            currentState = problem.GetCurrentState();
+            //currentState = problem.GetCurrentState();
             isDead = false;
             _pendingUpdate = false;
             
@@ -249,7 +249,7 @@ namespace QLearning
             if (_pendingUpdate)
             {
                 float oldQ = store.GetQValue(_lastState, _lastAction);
-                float maxNextQ = store.GetQValue(currentState, store.GetBestAction(currentState));
+                float maxNextQ = store.GetQValue(state, store.GetBestAction(state));
                 float newQ = (1 - alpha) * oldQ + alpha * (intervalReward + gamma * maxNextQ);
                 store.StoreQValue(_lastState, _lastAction, newQ);
             }
@@ -264,13 +264,13 @@ namespace QLearning
             List<Action> actions = problem.GetAvailableActions(state);
             
             //use a random action this time?    //or use best action available
-            Action action = (Random.value < rho) ? OneOf(actions) : store.GetBestAction(currentState);
+            Action action = (Random.value < rho) ? OneOf(actions) : store.GetBestAction(state);
                 
             //execute actions
             problem.ExecuteAction(action);
             
             //save for the next update cycle
-            _lastState = currentState;
+            _lastState = state;
             _lastAction = action;
             _pendingUpdate = true;
             
