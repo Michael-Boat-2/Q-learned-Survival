@@ -133,6 +133,7 @@ namespace QLearning
         
         public void SpawnBossZombie(GameObject strongPrefab)
         {
+            if(!strongPrefab) return;
             Vector3 spawnPos = GetSpawnPosition();
             GameObject strong = Instantiate(strongPrefab, spawnPos, Quaternion.identity);
             activeZombies.Add(strong);

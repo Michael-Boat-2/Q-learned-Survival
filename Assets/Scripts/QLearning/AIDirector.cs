@@ -45,7 +45,7 @@ namespace QLearning
 
 
         //spawn boss
-        [SerializeField] private bool hasScriptedEvent = false;
+        [SerializeField] private bool hasScriptedEvent = true;
         [SerializeField] private float eventCooldown;
         [SerializeField] private GameObject bossZombie;
 
