@@ -12,7 +12,7 @@ namespace QLearning
         [SerializeField] private NavMeshAgent navAgent;
         
         [SerializeField] private Transform agentTransform;
-        [SerializeField] private float moveSpeed = 5f;
+        //[SerializeField] private float moveSpeed = 5f;
         [SerializeField] private float currentHealth = 100f;
         [SerializeField] private float maxHealth = 100f;
         [SerializeField] private int currentAmmo = 6;

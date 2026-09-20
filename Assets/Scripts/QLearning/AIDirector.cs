@@ -102,7 +102,7 @@ namespace QLearning
                 
                 case Difficulty.Hard:
 
-                    spawnRate = 1.5f;
+                    spawnRate = 2f;
                     pickupRate = 0.5f;
                     //rewardScaler = 0.8f;
                     
@@ -130,7 +130,7 @@ namespace QLearning
                     else if (currentTension - targetTension < -adjThreshold)
                     {
                         
-                        spawnRate = Mathf.Lerp(spawnRate, 1.5f, 0.1f * Time.deltaTime );
+                        spawnRate = Mathf.Lerp(spawnRate, 2.5f, 0.1f * Time.deltaTime );
                         pickupRate = 0.8f;
                        
 

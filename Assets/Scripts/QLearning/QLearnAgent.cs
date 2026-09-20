@@ -1,5 +1,6 @@
 using UnityEngine;
 using System.Collections.Generic;
+using System.Globalization;
 using UnityEngine.Serialization;
 using System.Text;
 using System.IO;
@@ -164,10 +165,9 @@ namespace QLearning
             //Record data at intervals
             if (_episodesCompleted % logInterval == 0)
             {
-                trainingLog.AppendLine($"{_episodesCompleted};{_episodeTimer:F1};{_totalEpisodeRewards:F2}");
-                Debug.Log($"Episode: {_episodesCompleted}, Survival Time: {_episodeTimer:F1}, Rewards Gained: {_totalEpisodeRewards:F2}");
+                trainingLog.AppendLine($"{_episodesCompleted};{_episodeTimer.ToString("F1",CultureInfo.InvariantCulture)};{_totalEpisodeRewards.ToString("F2",CultureInfo.InvariantCulture)}");
+                Debug.Log($"Episode: {_episodesCompleted}, Survival Time: {_episodeTimer.ToString("F1",CultureInfo.InvariantCulture)}, Rewards Gained: {_totalEpisodeRewards.ToString("F2",CultureInfo.InvariantCulture)}");
             }
-            
             
             
             StartNewEpisode();

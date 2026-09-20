@@ -8,8 +8,8 @@ namespace QLearning
         
         [SerializeField] private GameObject zombiePrefab;
         [SerializeField] private Transform[] spawnPoints;
-        [SerializeField] private float baseSpawnInterval = 5f;
-        [SerializeField] private int maxZombies = 8;
+        [SerializeField] private float baseSpawnInterval = 3f;
+        [SerializeField] private int maxZombies = 12;
         
         
         [SerializeField] private Vector2 spawnAreaSize = new Vector2(20f, 20f);

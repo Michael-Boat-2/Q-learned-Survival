@@ -12,7 +12,7 @@ namespace QLearning
         [SerializeField] private GameObject ammoPickupPrefab;
         
         [SerializeField] private Transform[] spawnPoints;
-        [SerializeField] private float baseSpawnInterval = 8f;
+        [SerializeField] private float baseSpawnInterval = 10f;
         [SerializeField] private int maxPickups = 4;
         [SerializeField] private Vector2 spawnAreaSize = new Vector2(15f, 15f);
         

@@ -12,7 +12,7 @@ namespace QLearning
 
         [SerializeField] private float health;
         
-        [SerializeField] private float attackDistance = 1.5f;
+        [SerializeField] private float attackDistance;
         [SerializeField] private float attackDamage = 25f;
         [SerializeField]private float attackCooldown = 1f;
 
