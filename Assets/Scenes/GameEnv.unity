@@ -333,13 +333,13 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   loadSavedModel: 0
-  modelFileName: testing_baseline_100
-  csvTrainedName: testing_baseline_100
+  modelFileName: testRate_baseline_800
+  csvTrainedName: testRate_baseline_800
   playerModel: {fileID: 115344530}
   aiDirector: {fileID: 917447353}
   problem: {fileID: 115344531}
-  totalEpisodes: 100
-  alpha: 0.1
+  totalEpisodes: 800
+  alpha: 0.2
   gamma: 0.75
   rho: 0.1
   isTraining: 1
@@ -390,7 +390,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   navAgent: {fileID: 115344532}
   agentTransform: {fileID: 115344527}
-  moveSpeed: 5
   currentHealth: 100
   maxHealth: 100
   currentAmmo: 6
@@ -407,7 +406,7 @@ MonoBehaviour:
   healthLossPenalty: 0.5
   ammoPickupReward: 0.4
   killReward: 2
-  deathPenalty: 3
+  deathPenalty: 1.5
   player: {fileID: 115344530}
 --- !u!195 &115344532
 NavMeshAgent:

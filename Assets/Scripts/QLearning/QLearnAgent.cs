@@ -28,9 +28,9 @@ namespace QLearning
         //iterations
         //[SerializeField] private int iterations = 1000;
         //private int _currentIteration = 0;
-        [SerializeField] private int totalEpisodes = 500;
+        [SerializeField] private int totalEpisodes = 800;
         
-        [SerializeField] private float alpha = 0.1f;
+        [SerializeField] private float alpha = 0.2f;
         [SerializeField] private float gamma = 0.75f;
         [SerializeField] private float rho = 0.1f;
         //[SerializeField] private float nu = 0.01f;
@@ -160,6 +160,9 @@ namespace QLearning
         private void EndEpisode()
         {
             _episodesCompleted++;
+            
+            // epsilon(rho) decay
+            rho = Mathf.Max(0.01f, rho * 0.995f);
             
             //Log information about training
             //Record data at intervals
