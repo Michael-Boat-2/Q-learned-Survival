@@ -149,7 +149,7 @@ MonoBehaviour:
   navMeshAgent: {fileID: 4616744332283600018}
   targetAgent: {fileID: 0}
   health: 200
-  attackDistance: 1.5
+  attackDistance: 1.8
   attackDamage: 25
   attackCooldown: 1
   rotationSpeed: 5

@@ -487,6 +487,28 @@ namespace QLearning
             agentTransform.position = startPosition;
         }
         
+        
+        private void OnDrawGizmosSelected()
+        {
+            if (agentTransform == null) return;
+
+            /*// Density radius — cyan wire sphere
+            Gizmos.color = new Color(0f, 1f, 1f, 0.4f);
+            Gizmos.DrawWireSphere(agentTransform.position, densityRadius);*/
+
+            // Near threshold — green wire sphere
+            Gizmos.color = new Color(0f, 1f, 0f, 0.3f);
+            Gizmos.DrawWireSphere(agentTransform.position, nearDistance);
+
+            // Medium threshold — yellow wire sphere
+            Gizmos.color = new Color(1f, 1f, 0f, 0.3f);
+            Gizmos.DrawWireSphere(agentTransform.position, mediumDistance);
+
+            // Shot range — red wire sphere (optional, helps see where shooting works)
+            Gizmos.color = new Color(1f, 0f, 0f, 0.2f);
+            Gizmos.DrawWireSphere(agentTransform.position, shotRange);
+        }
+        
      
     }
 }
