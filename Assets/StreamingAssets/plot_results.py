@@ -58,7 +58,7 @@ for difficulty in DIFFICULTIES:
     axes[0].fill_between(ep, mean - std, mean + std, color=color, alpha=0.25, label="± Std")
     axes[0].set_xlabel("Episode")
     axes[0].set_ylabel("Survival Time (s)")
-    axes[0].set_title(f"{difficulty.capitalize()} — Survival Time (mean ± std)")
+    axes[0].set_title(f"{difficulty.capitalize()} Survival Time (mean ± std)")
     axes[0].legend()
     axes[0].grid(True, alpha=0.3)
     axes[0].set_ylim(0, 32)
@@ -69,7 +69,7 @@ for difficulty in DIFFICULTIES:
     axes[1].fill_between(ep, mean - std, mean + std, color=color, alpha=0.25, label="± Std")
     axes[1].set_xlabel("Episode")
     axes[1].set_ylabel("Total Reward")
-    axes[1].set_title(f"{difficulty.capitalize()} — Total Reward (mean ± std)")
+    axes[1].set_title(f"{difficulty.capitalize()} Total Reward (mean ± std)")
     axes[1].legend()
     axes[1].grid(True, alpha=0.3)
 
