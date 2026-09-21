@@ -150,6 +150,6 @@ MonoBehaviour:
   targetAgent: {fileID: 0}
   health: 100
   attackDistance: 1.8
-  attackDamage: 25
+  attackDamage: 30
   attackCooldown: 1
   rotationSpeed: 5

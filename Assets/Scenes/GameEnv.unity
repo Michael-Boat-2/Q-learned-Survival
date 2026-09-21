@@ -332,10 +332,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 28a7e7c399814c5e888acdd63d3dcf33, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  controlledByExperimentManager: 1
+  controlledByExperimentManager: 0
   loadSavedModel: 0
-  modelFileName: testLast2_baseline_800
-  csvTrainedName: testLast2_baseline_800
+  modelFileName: st_baseline_800
+  csvTrainedName: st_baseline_800
   playerModel: {fileID: 115344530}
   aiDirector: {fileID: 917447353}
   problem: {fileID: 115344531}
@@ -397,11 +397,11 @@ MonoBehaviour:
   currentAmmo: 6
   maxAmmo: 6
   shotRange: 10
-  fireRate: 2
+  fireRate: 0.5
   criticalHealth: 0.3
   hurtHealth: 0.6
-  nearDistance: 4
-  mediumDistance: 8
+  nearDistance: 5
+  mediumDistance: 9
   survivalReward: 0.02
   healthGainReward: 0.5
   healthLossPenalty: 0.7
@@ -1462,7 +1462,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!114 &1178034139
 MonoBehaviour:
   m_ObjectHideFlags: 0
