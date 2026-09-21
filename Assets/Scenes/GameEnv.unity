@@ -169,7 +169,7 @@ MonoBehaviour:
   - {fileID: 965152990}
   - {fileID: 1364725034}
   - {fileID: 1057659684}
-  baseSpawnInterval: 3
+  baseSpawnInterval: 2
   maxZombies: 12
   spawnAreaSize: {x: 25, y: 25}
   minDistanceFromPlayer: 5
@@ -332,14 +332,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 28a7e7c399814c5e888acdd63d3dcf33, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  controlledByExperimentManager: 0
+  controlledByExperimentManager: 1
   loadSavedModel: 0
-  modelFileName: st_baseline_800
-  csvTrainedName: st_baseline_800
+  modelFileName: nuu_baseline_800
+  csvTrainedName: nuu_baseline_800
   playerModel: {fileID: 115344530}
   aiDirector: {fileID: 917447353}
   problem: {fileID: 115344531}
-  totalEpisodes: 800
+  totalEpisodes: 500
   alpha: 0.1
   gamma: 0.8
   rho: 0.1
@@ -349,7 +349,7 @@ MonoBehaviour:
   episodeTimeout: 30
   timeScale: 50
   store: {fileID: 115344529}
-  logInterval: 25
+  logInterval: 1
   zombieSpawner: {fileID: 41375028}
   pickupSpawner: {fileID: 491440605}
 --- !u!114 &115344529
@@ -396,8 +396,8 @@ MonoBehaviour:
   maxHealth: 100
   currentAmmo: 6
   maxAmmo: 6
-  shotRange: 10
-  fireRate: 0.5
+  shotRange: 9
+  fireRate: 2
   criticalHealth: 0.3
   hurtHealth: 0.6
   nearDistance: 5
@@ -1462,7 +1462,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!114 &1178034139
 MonoBehaviour:
   m_ObjectHideFlags: 0
