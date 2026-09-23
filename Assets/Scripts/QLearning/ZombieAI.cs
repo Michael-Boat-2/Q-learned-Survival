@@ -12,11 +12,13 @@ namespace QLearning
 
         [SerializeField] private float health;
         
-        [SerializeField] private float attackDistance;
+        [SerializeField] private float attackDistance = 1.3f;
         [SerializeField] private float attackDamage = 15f;
         [SerializeField]private float attackCooldown = 1f;
-
         [SerializeField] private float rotationSpeed = 5f;
+        
+        //Reinforcement Target
+        private ReinforcementProblem _targetRP;
      
         private Animator _animator;
         private float attackCooldownTimer = 0;
@@ -27,7 +29,16 @@ namespace QLearning
         {
             navMeshAgent = GetComponent<NavMeshAgent>();
             
+            var player = GameObject.FindGameObjectWithTag("Player");
+            targetAgent = player.transform;
+            _targetRP = player.GetComponent<ReinforcementProblem>();
+            
+            
             targetAgent = GameObject.FindGameObjectWithTag("Player").transform;
+            
+            
+            //Zombie must be able to physically get within attack range
+            navMeshAgent.stoppingDistance = attackDistance * 0.8f;
             
         }
 
@@ -36,30 +47,30 @@ namespace QLearning
         private void FixedUpdate()
         {
         
+            
+            if(!targetAgent) return;
+            
             if( attackCooldownTimer > 0f )
             {
                 attackCooldownTimer -= Time.fixedDeltaTime;
             }
-            else if(attackCooldownTimer <= 0f && navMeshAgent.isStopped)
-            {
-                navMeshAgent.isStopped = false;
-            }
-
-
-            if (!targetAgent) return;
             
-            Chase();
-        
-            /*var distance = Vector3.Distance(transform.position, targetAgent.transform.position);
+            
+            float dist = FlatDistance(transform.position, targetAgent.position);
 
-            if (distance < attackDistance)
+            if (dist <= attackDistance)
             {
-                Attack();
+                if (attackCooldownTimer <= 0f && _targetRP)
+                {
+                    _targetRP.TakeDamage(attackDamage);
+                    attackCooldownTimer = attackCooldown;
+                }
             }
-            else
-            {
-                Chase();
-            }*/
+            
+            
+            //Consider limiting chase distance
+            Chase();
+            
         }
 
 
@@ -76,24 +87,7 @@ namespace QLearning
             attackCooldownTimer = attackCooldown;
         
         }
-        
-        private void OnCollisionStay(Collision collision)
-        {
-            if (collision.gameObject.CompareTag("Player") && attackCooldownTimer <= 0)
-            {
-                var rp = collision.gameObject.GetComponent<ReinforcementProblem>();
-                if (rp != null)
-                {
-                    
-                   
-                    rp.TakeDamage(attackDamage);
-                    
-                   
-                    attackCooldownTimer = attackCooldown;
-                }
-            }
-        }
-
+ 
 
         private void Chase()
         {
@@ -132,6 +126,11 @@ namespace QLearning
         }
 
     
+        private static float FlatDistance(Vector3 a, Vector3 b)
+        {
+            a.y = 0; b.y = 0;
+            return Vector3.Distance(a, b);
+        }
     
     
     

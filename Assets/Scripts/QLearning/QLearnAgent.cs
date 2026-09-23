@@ -221,15 +221,34 @@ namespace QLearning
             // epsilon(rho) decay
             rho = Mathf.Max(0.01f, rho * 0.995f);
             
+            
+            bool died = problem.IsDead();
+            
+            
             //Log information about training
             //Record data at intervals
+           
+            //appends every episode
+            trainingLog.AppendLine(string.Join(";",
+                _episodesCompleted,
+                _episodeTimer.ToString("F1", CultureInfo.InvariantCulture),
+                _totalEpisodeRewards.ToString("F2", CultureInfo.InvariantCulture),
+                died ? 1 : 0,
+                problem.DamageEvents,
+                problem.DamageTaken.ToString("F0", CultureInfo.InvariantCulture),
+                problem.ShotsFired,
+                problem.Kills));
+            
+            
+            //logs to console in intervals
             if (_episodesCompleted % logInterval == 0)
-            {
-                trainingLog.AppendLine($"{_episodesCompleted};{_episodeTimer.ToString("F1",CultureInfo.InvariantCulture)};{_totalEpisodeRewards.ToString("F2",CultureInfo.InvariantCulture)}");
-                Debug.Log($"Episode: {_episodesCompleted}, Survival Time: {_episodeTimer.ToString("F1",CultureInfo.InvariantCulture)}, Rewards Gained: {_totalEpisodeRewards.ToString("F2",CultureInfo.InvariantCulture)}");
-            }
+                Debug.Log($"Ep {_episodesCompleted} | t={_episodeTimer:F1}s died={died} " +
+                          $"hits={problem.DamageEvents} dmg={problem.DamageTaken:F0} " +
+                          $"shots={problem.ShotsFired} kills={problem.Kills}");
+        
             
-            
+
+
             StartNewEpisode();
         }
         
@@ -291,7 +310,7 @@ namespace QLearning
             if (trainingLog.Length > 0)
             {
                 string path = Path.Combine(Application.streamingAssetsPath, csvTrainedName + ".csv");
-                string header = "Episode;SurvivalTime;TotalReward \n";
+                string header = "Episode;SurvivalTime;TotalReward;Died;DamageEvents;DamageTaken;ShotsFired;Kills\n";
 
                 if (File.Exists(path))
                 {

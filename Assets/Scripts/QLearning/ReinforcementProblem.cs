@@ -66,6 +66,14 @@ namespace QLearning
 
         //private float rewardScale = 1f;
         
+        //Episode Stats
+        public int DamageEvents { get; private set; }
+        public float DamageTaken { get; private set; }
+        public int ShotsFired { get; private set; }
+        public int Kills { get; private set; }
+        
+        
+        
         private void Start()
         {
             startPosition = agentTransform.position;
@@ -210,6 +218,9 @@ namespace QLearning
                         {
                             Shoot(target);
                             currentAmmo--;
+                            
+                            ShotsFired++;
+                            
                         }
 
                         fireTimer = fireRate;
@@ -223,10 +234,7 @@ namespace QLearning
         {
             
             navAgent.SetDestination(target);
-            /*Vector3 direction = (target - agentTransform.position).normalized;
-            Vector3 oldPosition = agentTransform.position;
-            
-            agentTransform.position += direction * moveSpeed * Time.deltaTime;*/
+          
             
         }
         
@@ -247,6 +255,7 @@ namespace QLearning
                     if (zombie.IsDead())
                     {
                         zombieKilled = true;
+                        Kills++;
                     }
                        
                 }
@@ -254,13 +263,7 @@ namespace QLearning
         }
 
 
-        /*
-        public void SetRewardScale(float scale)
-        {
-            //fixed to 1.0f, no more reward scaling
-            rewardScale = 1.0f;
-        }
-        */
+    
         
         
         //Reward Function
@@ -452,14 +455,13 @@ namespace QLearning
             
             player.UpdateHits();
             
-            if (currentHealth - damage <= 0)
-            {
-                currentHealth = 0;
-            }
-            else
-            {
-                currentHealth -= damage;
-            }
+            float applied = Mathf.Min(damage, currentHealth);
+            currentHealth -= applied;
+
+            DamageEvents++;
+            DamageTaken += applied;
+
+
         }
         
         public void Heal(float amount)
@@ -502,8 +504,13 @@ namespace QLearning
             prevAmmo = currentAmmo;
             zombieKilled = false;
             fireTimer = 0f;
+
+            //set back to start position
+            navAgent.Warp(startPosition);
             
-            agentTransform.position = startPosition;
+            DamageEvents = 0; DamageTaken = 0f; ShotsFired = 0;
+            Kills = 0;
+            
         }
         
         
