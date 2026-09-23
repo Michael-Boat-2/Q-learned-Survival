@@ -347,7 +347,7 @@ MonoBehaviour:
   isTraining: 1
   decisionPeriod: 0.2
   episodeTimeout: 30
-  timeScale: 25
+  timeScale: 1
   store: {fileID: 115344529}
   logInterval: 1
   zombieSpawner: {fileID: 41375028}
