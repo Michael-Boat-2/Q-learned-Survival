@@ -339,7 +339,7 @@ MonoBehaviour:
   playerModel: {fileID: 115344530}
   aiDirector: {fileID: 917447353}
   problem: {fileID: 115344531}
-  totalEpisodes: 500
+  totalEpisodes: 800
   alpha: 0.1
   gamma: 0.8
   rho: 0.1
@@ -396,7 +396,7 @@ MonoBehaviour:
   maxHealth: 100
   currentAmmo: 6
   maxAmmo: 6
-  shotRange: 9
+  shotRange: 11
   fireRate: 2
   criticalHealth: 0.3
   hurtHealth: 0.6
@@ -1478,7 +1478,7 @@ MonoBehaviour:
   agent: {fileID: 115344528}
   store: {fileID: 115344529}
   director: {fileID: 917447353}
-  seeds: 2d0000002e0000002f00000030000000310000003200000033000000
+  seeds: 2a0000002b0000002c000000
   difficulties: 00000000010000000200000003000000
   postRunDelaySeconds: 3
   currentRun: 

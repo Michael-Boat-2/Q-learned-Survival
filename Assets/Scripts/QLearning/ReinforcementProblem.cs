@@ -115,7 +115,11 @@ namespace QLearning
             actions.Add(new Action(Action.ActionType.MoveToPickup));
             
             var target = FindNearestZombie();
-            bool inRange = target && Vector3.Distance(agentTransform.position, target.transform.position) < shotRange;
+            
+            //bool inRange = target && Vector3.Distance(agentTransform.position, target.transform.position) < shotRange;
+            
+            //allow shooting availability out of range
+            bool inRange = target;
             
             // Shoot action requires ammo, an enemy and fire rate control
             if (currentAmmo > 0 && inRange && fireTimer <= 0)
@@ -195,7 +199,14 @@ namespace QLearning
                         var target = FindNearestZombie();
                         
                         //shoot in range
-                        if (target && Vector3.Distance(agentTransform.position, target.transform.position) < shotRange)
+                        /*if (target && Vector3.Distance(agentTransform.position, target.transform.position) < shotRange)
+                        {
+                            Shoot(target);
+                            currentAmmo--;
+                        }*/
+                        
+                        //shoot out
+                        if (target)
                         {
                             Shoot(target);
                             currentAmmo--;

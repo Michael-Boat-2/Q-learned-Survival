@@ -46,7 +46,7 @@ namespace QLearning
                 {
                     runNumber++;
                     string diffName = difficulty.ToString().ToLower();
-                    currentRun = $"{diffName}_seed{seed}";
+                    currentRun = $"col_{diffName}_seed{seed}";
 
                     string csvName   = currentRun;      // e.g. baseline_seed42
                     string modelName = currentRun;      // e.g. baseline_seed42
