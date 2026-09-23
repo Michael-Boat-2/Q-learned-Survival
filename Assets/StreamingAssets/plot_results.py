@@ -54,27 +54,27 @@ for difficulty in DIFFICULTIES:
 
     # --- Survival Time ---
     ep, mean, std = aggregate(difficulty, "SurvivalTime")
-    axes[0].plot(ep, mean, color=color, linewidth=2, label="Mean (3 seeds)")
+    axes[0].plot(ep, mean, color=color, linewidth=2, label=f"Mean ({len(SEEDS)} seeds)")
     axes[0].fill_between(ep, mean - std, mean + std, color=color, alpha=0.25, label="± Std")
     axes[0].set_xlabel("Episode")
     axes[0].set_ylabel("Survival Time (s)")
-    axes[0].set_title(f"{difficulty.capitalize()} Survival Time (mean ± std)")
+    axes[0].set_title(f"{difficulty.capitalize()} Survival Time w/ far shooting (mean ± std)")
     axes[0].legend()
     axes[0].grid(True, alpha=0.3)
     axes[0].set_ylim(0, 32)
 
     # --- Total Reward ---
     ep, mean, std = aggregate(difficulty, "TotalReward")
-    axes[1].plot(ep, mean, color=color, linewidth=2, label="Mean (3 seeds)")
+    axes[1].plot(ep, mean, color=color, linewidth=2, label=f"Mean ({len(SEEDS)} seeds)")
     axes[1].fill_between(ep, mean - std, mean + std, color=color, alpha=0.25, label="± Std")
     axes[1].set_xlabel("Episode")
     axes[1].set_ylabel("Total Reward")
-    axes[1].set_title(f"{difficulty.capitalize()} Total Reward (mean ± std)")
+    axes[1].set_title(f"{difficulty.capitalize()} Total Reward w/ far shooting (mean ± std)")
     axes[1].legend()
     axes[1].grid(True, alpha=0.3)
 
     plt.tight_layout()
-    plt.savefig(OUTPUT_DIR / f"per_{difficulty}.png", dpi=150)
+    plt.savefig(OUTPUT_DIR / f"col_per_{difficulty}.png", dpi=150)
     plt.close()
     print(f"  Saved per_{difficulty}.png")
 
@@ -98,18 +98,18 @@ for difficulty in DIFFICULTIES:
 
 axes[0].set_xlabel("Episode")
 axes[0].set_ylabel("Survival Time (s)")
-axes[0].set_title("Survival Time — All Conditions (mean ± std)")
+axes[0].set_title("Survival Time over All Conditions w/ far shooting (mean ± std)")
 axes[0].legend()
 axes[0].grid(True, alpha=0.3)
 
 axes[1].set_xlabel("Episode")
 axes[1].set_ylabel("Total Reward")
-axes[1].set_title("Total Reward — All Conditions (mean ± std)")
+axes[1].set_title("Total Reward over All Conditions w/ far shooting (mean ± std)")
 axes[1].legend()
 axes[1].grid(True, alpha=0.3)
 
 plt.tight_layout()
-plt.savefig(OUTPUT_DIR / "cross_condition.png", dpi=150)
+plt.savefig(OUTPUT_DIR / "col_cross_condition.png", dpi=150)
 plt.close()
 print("  Saved cross_condition.png")
 
