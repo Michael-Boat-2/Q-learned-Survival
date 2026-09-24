@@ -411,11 +411,11 @@ MonoBehaviour:
   mediumDistance: 9
   densityRadius: 9
   pickupNearDistance: 8
-  survivalReward: 0.02
-  healthGainReward: 0.5
-  healthLossPenalty: 3
-  ammoPickupReward: 0.2
-  killReward: 3
+  survivalReward: 0.1
+  healthGainReward: 0.3
+  healthLossPenalty: 0.05
+  ammoPickupReward: 0.3
+  killReward: 0.5
   deathPenalty: 10
   player: {fileID: 115344530}
 --- !u!195 &115344532
