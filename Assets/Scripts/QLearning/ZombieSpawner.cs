@@ -8,12 +8,12 @@ namespace QLearning
         
         [SerializeField] private GameObject zombiePrefab;
         [SerializeField] private Transform[] spawnPoints;
-        [SerializeField] private float baseSpawnInterval = 2f;
-        [SerializeField] private int maxZombies = 16;
+        [SerializeField] private float baseSpawnInterval = 2.5f;
+        [SerializeField] private int maxZombies = 12;
         
         
         [SerializeField] private Vector2 spawnAreaSize = new Vector2(20f, 20f);
-        [SerializeField] private float minDistanceFromPlayer = 5f;
+        [SerializeField] private float minSpawnDistance;
         
         [SerializeField] private float spawnRate = 1f;
         [SerializeField] private List<GameObject> activeZombies = new List<GameObject>();
@@ -69,7 +69,7 @@ namespace QLearning
         {
             foreach (var zombie in activeZombies)
             {
-                if (zombie != null)
+                if (zombie)
                     Destroy(zombie);
             }
             activeZombies.Clear();
@@ -90,9 +90,15 @@ namespace QLearning
         {
             if (spawnPoints != null && spawnPoints.Length > 0)
             {
-               
-                Transform point = spawnPoints[Random.Range(0, spawnPoints.Length)];
-                return point.position;
+                var valid = new List<Transform>();
+                foreach (var p in spawnPoints)
+                    if (Vector3.Distance(p.position, player.position) >= minSpawnDistance)  
+                        valid.Add(p);
+
+                var pool = valid.Count > 0 ? valid : new List<Transform>(spawnPoints);
+                return pool[Random.Range(0, pool.Count)].position;
+                
+                
             }
             else
             {
@@ -106,7 +112,7 @@ namespace QLearning
                     randomPos = transform.position + new Vector3(x, 0.5f, z);
                     attempts++;
                 }
-                while (player && Vector3.Distance(randomPos, player.position) < minDistanceFromPlayer && attempts < 20);
+                while (player && Vector3.Distance(randomPos, player.position) < minSpawnDistance && attempts < 20);
                 
                 return randomPos;
             }

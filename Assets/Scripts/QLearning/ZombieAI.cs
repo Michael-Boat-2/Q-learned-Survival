@@ -27,6 +27,7 @@ namespace QLearning
         [SerializeField] private float wanderSpeed = 1.5f;
         [SerializeField] private float chaseSpeed = 3.3f;
         [SerializeField] private float wanderRadius = 6f;
+        [SerializeField] private float wanderBias = 0.5f;
         private bool _alerted;
         private float _wanderTimer;
         
@@ -105,12 +106,16 @@ namespace QLearning
             navMeshAgent.speed = wanderSpeed;
             _wanderTimer -= Time.fixedDeltaTime;
             if (_wanderTimer > 0f && navMeshAgent.remainingDistance > 0.5f) return;
-            
-            
-            Vector3 p = transform.position + Random.insideUnitSphere * wanderRadius;
+
+            Vector3 toPlayer = targetAgent.position - transform.position;
+            toPlayer.y = 0;
+            Vector3 randomDir = Random.insideUnitSphere; randomDir.y = 0;
+
+            Vector3 dir = (toPlayer.normalized * wanderBias + randomDir.normalized * (1f - wanderBias)).normalized;
+            Vector3 p = transform.position + dir * wanderRadius;
+
             if (NavMesh.SamplePosition(p, out var hit, 2f, NavMesh.AllAreas))
                 navMeshAgent.SetDestination(hit.position);
-            
             _wanderTimer = Random.Range(2f, 4f);
             
         }

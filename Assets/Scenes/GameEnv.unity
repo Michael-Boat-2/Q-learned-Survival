@@ -169,10 +169,10 @@ MonoBehaviour:
   - {fileID: 965152990}
   - {fileID: 1364725034}
   - {fileID: 1057659684}
-  baseSpawnInterval: 3
+  baseSpawnInterval: 2.5
   maxZombies: 12
   spawnAreaSize: {x: 25, y: 25}
-  minDistanceFromPlayer: 5
+  minSpawnDistance: 12
   spawnRate: 1
   activeZombies: []
   player: {fileID: 0}
@@ -334,8 +334,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   controlledByExperimentManager: 0
   loadSavedModel: 0
-  modelFileName: randomPol8
-  csvTrainedName: randomPol8
+  modelFileName: randomPol9
+  csvTrainedName: randomPol9
   playerModel: {fileID: 115344530}
   aiDirector: {fileID: 917447353}
   problem: {fileID: 115344531}
