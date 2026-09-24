@@ -116,7 +116,7 @@ namespace QLearning
 
             if (NavMesh.SamplePosition(p, out var hit, 2f, NavMesh.AllAreas))
                 navMeshAgent.SetDestination(hit.position);
-            _wanderTimer = Random.Range(2f, 4f);
+            _wanderTimer = 3f;
             
         }
 

@@ -8,7 +8,7 @@ namespace QLearning
     {
         
         private Dictionary<string, float[]> qTable;
-        private const int ActionsBuffer = 4;
+        private static readonly int ActionsBuffer = System.Enum.GetValues(typeof(Action.ActionType)).Length;
 
         public void Awake()
         {

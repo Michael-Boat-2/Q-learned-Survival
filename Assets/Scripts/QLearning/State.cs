@@ -10,7 +10,7 @@ namespace QLearning
         public int HealthStatus { get; set; }  
         
         // 1 if the agent is close to a wall / NavMesh edge (cornered risk)
-        public int NearWall { get; set; }
+       // public int NearWall { get; set; }
         
         public int PickupDist { get; set; }
         
@@ -18,19 +18,19 @@ namespace QLearning
         
         
         //State is based on below variables
-        public State(int enemyDist, int ammo, int health, int nearWall, int pickupDist)
+        public State(int enemyDist, int ammo, int health, int pickupDist)
         {
             EnemyProximity = enemyDist;
             AmmoStatus = ammo;
             HealthStatus = health;
-            NearWall = nearWall;
+            //NearWall = nearWall;
             PickupDist = pickupDist;
         }
         
 
         public string StateString()
         {
-            return $"{EnemyProximity},{AmmoStatus},{HealthStatus},{NearWall},{PickupDist}";
+            return $"{EnemyProximity},{AmmoStatus},{HealthStatus},{PickupDist}";
         }
         
         
@@ -45,14 +45,13 @@ namespace QLearning
                 {
                     for (int health = 0; health < 3; health++)
                     {
-                        for (var nearWall = 0; nearWall < 2; nearWall++)
+                       
+                        for (var pickupDist = 0; pickupDist < 3; pickupDist++)
                         {
-                            for (var pickupDist = 0; pickupDist < 3; pickupDist++)
-                            {
-                                states.Add(new State(distance, ammo, health, nearWall, pickupDist));
-                            }
-                           
+                            states.Add(new State(distance, ammo, health, pickupDist));
                         }
+                       
+                        
                         
                     }
                     

@@ -119,7 +119,7 @@ namespace QLearning
             var nearWall = GetNearWallCategory();
             var pickupDist = GetPickupCategory();
             
-            return new State(zombieDist, ammo, health, nearWall, pickupDist);
+            return new State(zombieDist, ammo, health, pickupDist);
         }
         
         
@@ -132,7 +132,7 @@ namespace QLearning
             var pickupDist = Random.Range(0, 3);
             
             
-            return new State(zombieDist, ammo, health, nearWall, pickupDist);
+            return new State(zombieDist, ammo, health,  pickupDist);
         }
         
         

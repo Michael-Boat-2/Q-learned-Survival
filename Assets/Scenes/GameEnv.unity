@@ -170,7 +170,7 @@ MonoBehaviour:
   - {fileID: 1364725034}
   - {fileID: 1057659684}
   baseSpawnInterval: 2.5
-  maxZombies: 12
+  maxZombies: 8
   spawnAreaSize: {x: 25, y: 25}
   minSpawnDistance: 12
   spawnRate: 1
@@ -334,8 +334,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   controlledByExperimentManager: 0
   loadSavedModel: 0
-  modelFileName: randomPol9
-  csvTrainedName: randomPol9
+  modelFileName: please_r0
+  csvTrainedName: please_r0
   playerModel: {fileID: 115344530}
   aiDirector: {fileID: 917447353}
   problem: {fileID: 115344531}
@@ -351,11 +351,11 @@ MonoBehaviour:
   episodeTimeout: 120
   timeScale: 50
   store: {fileID: 115344529}
-  logInterval: 1
+  logInterval: 25
   zombieSpawner: {fileID: 41375028}
   pickupSpawner: {fileID: 491440605}
   evalEpisodes: 50
-  evalCsvName: eval_fingersCrossed
+  evalCsvName: eval_mary
   evalTimeScale: 50
 --- !u!114 &115344529
 MonoBehaviour:
@@ -399,8 +399,8 @@ MonoBehaviour:
   agentTransform: {fileID: 115344527}
   currentHealth: 100
   maxHealth: 100
-  currentAmmo: 6
-  maxAmmo: 6
+  currentAmmo: 8
+  maxAmmo: 8
   shotRange: 9
   fireRate: 2
   invulnDuration: 0.75
