@@ -339,7 +339,8 @@ namespace QLearning
             float distance = Vector3.Distance(agentTransform.position, target.transform.position);
             
             // stochastic hit chance based on distance
-            float hitChance = Mathf.Lerp(0.95f, 0.35f, distance / shotRange);
+            float hitChance = distance < nearDistance ? 0.95f
+                : Mathf.Lerp(0.9f, 0.35f, (distance - nearDistance) / (shotRange - nearDistance));
             
             if (distance < shotRange && Random.value < hitChance)
             {

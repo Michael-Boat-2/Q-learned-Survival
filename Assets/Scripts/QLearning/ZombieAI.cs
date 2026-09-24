@@ -64,7 +64,17 @@ namespace QLearning
             
             if(!targetAgent) return;
             
-            if( attackCooldownTimer > 0f )  attackCooldownTimer -= Time.fixedDeltaTime; 
+            if( attackCooldownTimer > 0f )  attackCooldownTimer -= Time.fixedDeltaTime;
+
+            //pause movement after catching player
+            if (_recoverTimer > 0f)
+            {
+                _recoverTimer -= Time.fixedDeltaTime;
+                navMeshAgent.isStopped = true;
+                return;
+            }
+            
+            navMeshAgent.isStopped = false;
             
             
             float dist = FlatDistance(transform.position, targetAgent.position);
@@ -76,6 +86,9 @@ namespace QLearning
                 {
                     _targetRP.TakeDamage(attackDamage, transform.position);
                     attackCooldownTimer = attackCooldown;
+                    
+                    //stop chasing for some time
+                    _recoverTimer = attackRecovery;
                 }
 
                 Chase();
