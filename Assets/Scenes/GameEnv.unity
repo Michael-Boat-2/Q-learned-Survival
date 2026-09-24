@@ -400,13 +400,16 @@ MonoBehaviour:
   maxAmmo: 6
   shotRange: 9
   fireRate: 2
+  invulnDuration: 0.75
+  knockbackDistance: 2
   criticalHealth: 0.3
   hurtHealth: 0.6
   nearDistance: 5
   mediumDistance: 9
+  densityRadius: 9
   survivalReward: 0.02
   healthGainReward: 0.5
-  healthLossPenalty: 0.7
+  healthLossPenalty: 3
   ammoPickupReward: 0.2
   killReward: 3
   deathPenalty: 10

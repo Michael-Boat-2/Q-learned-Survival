@@ -43,7 +43,7 @@ namespace QLearning
 
             if (!(_spawnTimer <= 0f)) return;
             
-            var type = Random.value < 0.6f ? PickupType.Health : PickupType.Ammo;
+            var type = Random.value < 0.5f ? PickupType.Health : PickupType.Ammo;
                 
             SpawnPickup(type);
                 

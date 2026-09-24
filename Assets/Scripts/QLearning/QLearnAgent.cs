@@ -240,7 +240,7 @@ namespace QLearning
             _episodesCompleted++;
             
             // epsilon(rho) decay
-            rho = Mathf.Max(0.01f, rho * epsilonDecay);
+            rho = Mathf.Max(minimumRho, rho * epsilonDecay);
             
             
             bool died = problem.IsDead();
@@ -258,14 +258,18 @@ namespace QLearning
                 problem.DamageEvents,
                 problem.DamageTaken.ToString("F0", CultureInfo.InvariantCulture),
                 problem.ShotsFired,
-                problem.Kills));
+                problem.Kills,
+                problem.HealthPickups,
+                problem.AmmoPickups
+                ));
             
             
             //logs to console in intervals
             if (_episodesCompleted % logInterval == 0)
                 Debug.Log($"Ep {_episodesCompleted} | t={_episodeTimer:F1}s died={died} " +
                           $"hits={problem.DamageEvents} dmg={problem.DamageTaken:F0} " +
-                          $"shots={problem.ShotsFired} kills={problem.Kills}");
+                          $"shots={problem.ShotsFired} kills={problem.Kills}" +
+                          $"h_pickups={problem.HealthPickups} a_pickups={problem.AmmoPickups}");
         
             
 
@@ -303,7 +307,7 @@ namespace QLearning
             
     
             //use a random action this time?    //or use best action available
-            Action action = (Random.value < rho) ? OneOf(actions) : store.GetBestAction(state);
+            Action action = (Random.value < rho) ? OneOf(actions) : BestAvailable(state, actions);
                 
             //execute actions
             problem.ExecuteAction(action);
@@ -359,7 +363,7 @@ namespace QLearning
             if (trainingLog.Length > 0)
             {
                 string path = Path.Combine(Application.streamingAssetsPath, csvTrainedName + ".csv");
-                string header = "Episode;SurvivalTime;TotalReward;Died;DamageEvents;DamageTaken;ShotsFired;Kills\n";
+                string header = "Episode;SurvivalTime;TotalReward;Died;DamageEvents;DamageTaken;ShotsFired;Kills;HealthPickups;AmmoPickups\n";
 
                 if (File.Exists(path))
                 {

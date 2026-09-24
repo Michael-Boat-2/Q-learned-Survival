@@ -39,8 +39,8 @@ namespace QLearning
         [SerializeField] private float nearDistance;
         [SerializeField] private float mediumDistance;
         
-        //[Header("Density Sensing")]
-        //[SerializeField] private float densityRadius;
+        [Header("Density Sensing")]
+        [SerializeField] private float densityRadius = 9f;
 
 
         [Header("Rewards")]
@@ -77,6 +77,8 @@ namespace QLearning
         public float DamageTaken { get; private set; }
         public int ShotsFired { get; private set; }
         public int Kills { get; private set; }
+        public int HealthPickups { get; private set; }
+        public int AmmoPickups { get; private set; }
         
         
         
@@ -102,9 +104,9 @@ namespace QLearning
             var zombieDist = GetZombieDistanceCategory();
             var ammo = GetAmmoCategory();
             var health = GetHealthCategory();
-           // var density = GetZombieDensityCategory();
+            var density = GetZombieDensityCategory();
             
-            return new State(zombieDist, ammo, health);
+            return new State(zombieDist, ammo, health, density);
         }
         
         
@@ -113,10 +115,10 @@ namespace QLearning
             var zombieDist = Random.Range(0, 3);
             var ammo = Random.Range(0, 3);
             var health = Random.Range(0, 3);
-           // var density = Random.Range(0, 3);
+            var density = Random.Range(0, 3);
             
             
-            return new State(zombieDist, ammo, health);
+            return new State(zombieDist, ammo, health,  density);
         }
         
         
@@ -178,9 +180,11 @@ namespace QLearning
                     break;
                     
                 case Action.ActionType.MoveToPickup:
-                    var pickUp = FindNearestPickup();
-                    if(pickUp)
-                        Move(pickUp.transform.position);
+                    
+                    var pickup = FindNearestPickup();
+                    
+                    //Move to the best pickup found
+                    Move(pickup.transform.position);
                     break;
                     
                 case Action.ActionType.Shoot:
@@ -247,9 +251,47 @@ namespace QLearning
                     bestScore = score;
                     best = target;
                 }
-
-                return best;
             }
+            
+            return best;
+        }
+
+        private GameObject FindBestPickup()
+        {
+            var pickups = GameObject.FindGameObjectsWithTag("Pickup");
+            
+            GameObject best = null;
+            float bestScore = float.MinValue;
+            
+            
+            float healthNeed = 1f - currentHealth/maxHealth;
+            
+            float ammoNeed = 1f - (float)currentAmmo/maxAmmo;
+
+
+            foreach (var p in pickups)
+            {
+                
+                var pu = p.GetComponent<Pickup>();
+                float need = pu.Type == PickupType.Health ? healthNeed : ammoNeed;
+                
+                
+                float dist =  Vector3.Distance(agentTransform.position, p.transform.position);
+                
+                // if needed and close, this is the target that will win
+                float score = need * 10f - dist;
+
+
+                if (score > bestScore)
+                {
+                    bestScore = score;
+                    best = p;
+                }
+
+
+            }
+            
+            return best;
             
         }
         
@@ -290,14 +332,15 @@ namespace QLearning
             reward += survivalReward;
             
             // Health Rewards for gains, Penalty for loss
-            float HealthChange = currentHealth - prevHealth;
+            float healthChange = currentHealth - prevHealth;
 
-            if (HealthChange < 0)
+            if (healthChange < 0)
             {
-                reward -= healthLossPenalty;
+                //scaling health change penalty
+                reward -= healthLossPenalty * (-healthChange/maxHealth);
                 
             }
-            else if (HealthChange > 0)
+            else if (healthChange > 0)
             {
                 reward += healthGainReward;
             }
@@ -347,7 +390,7 @@ namespace QLearning
         }
         
         
-        /*
+        
         private int GetZombieDensityCategory()
         {
             var zombies = GameObject.FindGameObjectsWithTag("Zombie");
@@ -363,7 +406,7 @@ namespace QLearning
             if (nearbyCount <= 3) return 1;   // 2–3 zombies — risky
             return 2;                          // 4+ zombies — dangerous
         }
-        */
+        
         
         
         private int GetAmmoCategory()
@@ -516,7 +559,9 @@ namespace QLearning
             {
                 currentHealth += amount;
             }
-            
+
+            HealthPickups++;
+
         }
         
         public void AddAmmo(int amount)
@@ -529,6 +574,9 @@ namespace QLearning
             {
                 currentAmmo += amount;
             }
+            
+            
+            AmmoPickups++;
         }
 
         public bool IsDead()
@@ -550,7 +598,7 @@ namespace QLearning
             //set back to start position
             navAgent.Warp(startPosition);
             
-            DamageEvents = 0; DamageTaken = 0f; ShotsFired = 0;
+            DamageEvents = 0; DamageTaken = 0f; ShotsFired = 0; HealthPickups = 0; AmmoPickups = 0;
             Kills = 0;
             
         }

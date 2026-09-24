@@ -9,16 +9,21 @@ namespace QLearning
         
         private Dictionary<string, float[]> qTable;
         private const int ActionsBuffer = 4;
-        
-        
-        
-        public QValueStore()
+
+        public void Awake()
         {
-            //create qTable indexed by states and action number in buffer
             qTable = new Dictionary<string, float[]>();
             
             InitQTable();
         }
+        
+        /*public QValueStore()
+        {
+            //create qTable indexed by states and action number in buffer
+            /*qTable = new Dictionary<string, float[]>();
+            
+            InitQTable();#1#
+        }*/
 
         public void ResetQTable()
         {

@@ -9,6 +9,9 @@ namespace QLearning
     {
         
         [SerializeField] private PickupType type;
+        public PickupType Type => type;
+        
+        
         [SerializeField] private float healthAmount = 30f;
         [SerializeField] private int ammoAmount = 3;
         [SerializeField] private float lifetime = 15f;
