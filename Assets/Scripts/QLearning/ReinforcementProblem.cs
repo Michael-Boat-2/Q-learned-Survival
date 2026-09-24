@@ -27,6 +27,17 @@ namespace QLearning
         [SerializeField] private float invulnDuration = 0.75f;
         [SerializeField] private float knockbackDistance = 2f;
         private float invulnTimer;
+
+        [Header("Dash")]
+        [SerializeField] private float dashSpeed = 8f;
+        [SerializeField] private float dashDuration = 0.4f;
+        [SerializeField] private float dashCooldown = 5f;
+        [SerializeField] private float dashInvuln = 0.3f;
+        [SerializeField] private float dashAcceleration = 100f;
+        private float dashTimer;
+        private float dashCooldownTimer;
+        private float baseSpeed;
+        private float baseAcceleration;
         
         
         [Header("Agent Discrete Thresholds")]
@@ -84,6 +95,7 @@ namespace QLearning
         // -1 = never hit
         public float TimeToFirstHit { get; private set; } = -1f;  
         public int MaxAlerted { get; private set; }
+        public int DashesUsed { get; private set; }
 
         private float _episodeTime;
         
@@ -92,6 +104,8 @@ namespace QLearning
         private void Start()
         {
             startPosition = agentTransform.position;
+            baseSpeed = navAgent.speed;
+            baseAcceleration = navAgent.acceleration;
             prevHealth = currentHealth;
             prevAmmo = currentAmmo;
         }
@@ -101,6 +115,13 @@ namespace QLearning
         {
             if(fireTimer > 0) fireTimer -= Time.deltaTime;
             if (invulnTimer > 0) invulnTimer -= Time.deltaTime;
+            if (dashCooldownTimer > 0) dashCooldownTimer -= Time.deltaTime;
+
+            if (dashTimer > 0)
+            {
+                dashTimer -= Time.deltaTime;
+                if (dashTimer <= 0) EndDash();
+            }
             
             
             _episodeTime += Time.deltaTime;
@@ -116,7 +137,6 @@ namespace QLearning
             var zombieDist = GetZombieDistanceCategory();
             var ammo = GetAmmoCategory();
             var health = GetHealthCategory();
-            var nearWall = GetNearWallCategory();
             var pickupDist = GetPickupCategory();
             
             return new State(zombieDist, ammo, health, pickupDist);
@@ -128,7 +148,6 @@ namespace QLearning
             var zombieDist = Random.Range(0, 3);
             var ammo = Random.Range(0, 3);
             var health = Random.Range(0, 3);
-            var nearWall = Random.Range(0, 2);
             var pickupDist = Random.Range(0, 3);
             
             
@@ -148,6 +167,10 @@ namespace QLearning
             //Will not flee if not close enough 
             if(d < mediumDistance)
                 actions.Add(new Action(Action.ActionType.Flee));
+
+            // Dash: emergency escape, only when threatened and off cooldown
+            if (d < mediumDistance && dashCooldownTimer <= 0 && dashTimer <= 0)
+                actions.Add(new Action(Action.ActionType.Dash));
               
             //Only move to pickups if they exist
             if(FindNearestPickup())
@@ -227,10 +250,35 @@ namespace QLearning
                         fireTimer = fireRate;
                     }
                     break;
+
+                case Action.ActionType.Dash:
+                    StartDash();
+                    break;
             }
         }
         
         
+        private void StartDash()
+        {
+            dashTimer = dashDuration;
+            dashCooldownTimer = dashCooldown;
+            invulnTimer = Mathf.Max(invulnTimer, dashInvuln);
+            DashesUsed++;
+
+            navAgent.speed = dashSpeed;
+            navAgent.acceleration = dashAcceleration;
+            Move(FindSafestPoint());
+        }
+
+        private void EndDash()
+        {
+            dashTimer = 0f;
+            if (baseSpeed <= 0f) return; // Start() hasn't cached the base values yet
+            navAgent.speed = baseSpeed;
+            navAgent.acceleration = baseAcceleration;
+        }
+
+
         private void Move(Vector3 target)
         {
             navAgent.SetDestination(target);
@@ -651,6 +699,9 @@ namespace QLearning
             zombieKilled = false;
             fireTimer = 0f;
             invulnTimer = 0f;
+            EndDash();
+            dashCooldownTimer = 0f;
+            DashesUsed = 0;
             
             _episodeTime = 0f;
             TimeToFirstHit = -1f;
