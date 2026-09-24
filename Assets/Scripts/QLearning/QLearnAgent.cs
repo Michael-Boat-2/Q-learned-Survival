@@ -62,6 +62,7 @@ namespace QLearning
         
         
         //Analysis
+        [Header("Analysis")]
         [SerializeField] private int logInterval;
         private StringBuilder trainingLog = new StringBuilder();
         
@@ -78,11 +79,22 @@ namespace QLearning
         
         
         //spawners
+        [Header("Spawners")]
         [SerializeField] private ZombieSpawner zombieSpawner;
         [SerializeField] private PickupSpawner pickupSpawner;
         
 
-
+        [Header("Evaluation")]
+        [SerializeField] private int evalEpisodes = 50;
+        [SerializeField] private string evalCsvName = "eval";
+        
+        // set be set to 1 in order to watch behaviours
+        [SerializeField] private float evalTimeScale = 50f;   
+        private bool _evaluating = false;
+        
+        
+        
+        
         private void Start()
         {
             
@@ -92,17 +104,14 @@ namespace QLearning
             if (loadSavedModel)
             {
                 
-                //Watch in normal timescale
-                Time.timeScale = 1f;
-                
-                //load an old model 
                 store.LoadFromFile(modelFileName);
-                isTraining = false;
-
-                //No exploration, just exploitation
-                rho = 0f;
-                Debug.Log("Running a trained inference Model");
-
+                _evaluating = true;
+                isTraining = true;          // reuse the episode loop
+                rho = 0f;                   // pure greedy
+                totalEpisodes = evalEpisodes;
+                Time.timeScale = evalTimeScale;
+                Debug.Log($"Evaluating model '{modelFileName}' for {evalEpisodes} episodes");
+                StartNewEpisode();
                 return;
                 
             }
@@ -213,34 +222,39 @@ namespace QLearning
                 float r = problem.ComputeIntervalReward();
                 _totalEpisodeRewards += r;
 
-                float oldQ = store.GetQValue(_lastState, _lastAction);
-                float target;
-
-                if (problem.IsDead())
+                if (!_evaluating)
                 {
-                    // Terminal state: no future, so no gamma * maxNextQ term
-                    target = r;
-                }
-                else
-                {
-                    //timeout, so we will still bootstrap from current state
-                    State s = problem.GetCurrentState();
-                    var acts = problem.GetAvailableActions(s);
-                    target = r + gamma * store.GetQValue(s,BestAvailable(s, acts));
-                }
-                
-               
-                float newQ = (1 - alpha) * oldQ + alpha * target;
-                store.StoreQValue(_lastState, _lastAction, newQ);
 
-                _pendingUpdate = false;
+                    float oldQ = store.GetQValue(_lastState, _lastAction);
+                    float target;
+
+                    if (problem.IsDead())
+                    {
+                        // Terminal state: no future, so no gamma * maxNextQ term
+                        target = r;
+                    }
+                    else
+                    {
+                        //timeout, so we will still bootstrap from current state
+                        State s = problem.GetCurrentState();
+                        var acts = problem.GetAvailableActions(s);
+                        target = r + gamma * store.GetQValue(s, BestAvailable(s, acts));
+                    }
+
+
+                    float newQ = (1 - alpha) * oldQ + alpha * target;
+                    store.StoreQValue(_lastState, _lastAction, newQ);
+                }
                 
             }
+            
+            _pendingUpdate = false;
             
             _episodesCompleted++;
             
             // epsilon(rho) decay
-            rho = Mathf.Max(minimumRho, rho * epsilonDecay);
+            if(!_evaluating)
+             rho = Mathf.Max(minimumRho, rho * epsilonDecay);
             
             
             bool died = problem.IsDead();
@@ -292,7 +306,7 @@ namespace QLearning
             
             
             //apply pending q-update
-            if (_pendingUpdate)
+            if (_pendingUpdate && !_evaluating)
             {
                 float oldQ = store.GetQValue(_lastState, _lastAction);
                 
@@ -362,7 +376,9 @@ namespace QLearning
         {
             if (trainingLog.Length > 0)
             {
-                string path = Path.Combine(Application.streamingAssetsPath, csvTrainedName + ".csv");
+                string name = _evaluating ? evalCsvName : csvTrainedName;
+                string path = Path.Combine(Application.streamingAssetsPath, name + ".csv");
+                
                 string header = "Episode;SurvivalTime;TotalReward;Died;DamageEvents;DamageTaken;ShotsFired;Kills;HealthPickups;AmmoPickups\n";
 
                 if (File.Exists(path))
@@ -374,7 +390,8 @@ namespace QLearning
                 Debug.Log($"Stored at {path}");
                 
                 
-                store.SaveToFile(modelFileName);
+                if (!_evaluating)
+                    store.SaveToFile(modelFileName);
                 
 
             }

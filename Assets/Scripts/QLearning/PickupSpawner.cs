@@ -1,5 +1,6 @@
 using UnityEngine;
 using System.Collections.Generic;
+using UnityEngine.AI;
 
 namespace QLearning
 {
@@ -15,6 +16,10 @@ namespace QLearning
         [SerializeField] private float baseSpawnInterval = 10f;
         [SerializeField] private int maxPickups = 4;
         [SerializeField] private Vector2 spawnAreaSize = new Vector2(15f, 15f);
+
+        [SerializeField] private float minFromPlayer = 4f;
+        [SerializeField] private float maxFromPlayer = 12f;
+        [SerializeField] private float minFromZombies = 4f;
         
         
         [SerializeField] private float spawnRate = 1f;
@@ -81,19 +86,21 @@ namespace QLearning
             activePickups.Add(pickup);
         }
         
+        
         private Vector3 GetSpawnPosition()
         {
-            if (spawnPoints != null && spawnPoints.Length > 0)
+            for (int i = 0; i < 15; i++)   // try a few candidates
             {
-                Transform point = spawnPoints[Random.Range(0, spawnPoints.Length)];
-                return point.position;
+                Vector2 r = Random.insideUnitCircle.normalized * Random.Range(minFromPlayer, maxFromPlayer);
+                Vector3 c = player.position + new Vector3(r.x, 0, r.y);
+                if (!NavMesh.SamplePosition(c, out var hit, 2f, NavMesh.AllAreas)) continue;
+
+                bool safe = true;
+                foreach (var z in GameObject.FindGameObjectsWithTag("Zombie"))
+                    if (Vector3.Distance(hit.position, z.transform.position) < minFromZombies) { safe = false; break; }
+                if (safe) return hit.position + Vector3.up * 0.5f;
             }
-            else
-            {
-                float x = Random.Range(-spawnAreaSize.x / 2f, spawnAreaSize.x / 2f);
-                float z = Random.Range(-spawnAreaSize.y / 2f, spawnAreaSize.y / 2f);
-                return transform.position + new Vector3(x, 0, z);
-            }
+            return transform.position;   // fallback: arena centre
         }
         
         public void SetSpawnRate(float rate)

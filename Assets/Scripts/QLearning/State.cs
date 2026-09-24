@@ -12,22 +12,25 @@ namespace QLearning
         // is it safe to shoot, considering the near zombies
         public int ZombieDensity { get; set; }
         
+        public int PickupDist { get; set; }
+        
         //public int TimeSinceEncounter { get; set; }
         
         
         //State is based on below variables
-        public State(int enemyDist, int ammo, int health, int density)
+        public State(int enemyDist, int ammo, int health, int density, int pickupDist)
         {
             EnemyProximity = enemyDist;
             AmmoStatus = ammo;
             HealthStatus = health;
             ZombieDensity = density;
+            PickupDist = pickupDist;
         }
         
 
         public string StateString()
         {
-            return $"{EnemyProximity},{AmmoStatus},{HealthStatus},{ZombieDensity}";
+            return $"{EnemyProximity},{AmmoStatus},{HealthStatus},{ZombieDensity},{PickupDist}";
         }
         
         
@@ -44,7 +47,11 @@ namespace QLearning
                     {
                         for (var density = 0; density < 3; density++)
                         {
-                            states.Add(new State(distance, ammo, health, density));
+                            for (var pickupDist = 0; pickupDist < 3; pickupDist++)
+                            {
+                                states.Add(new State(distance, ammo, health, density,  pickupDist));
+                            }
+                           
                         }
                         
                     }

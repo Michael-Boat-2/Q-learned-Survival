@@ -42,6 +42,8 @@ namespace QLearning
         [Header("Density Sensing")]
         [SerializeField] private float densityRadius = 9f;
 
+        [Header("Pickup Sensing")]
+        [SerializeField] private float pickupNearDistance = 8f;
 
         [Header("Rewards")]
         //Rewards
@@ -105,8 +107,9 @@ namespace QLearning
             var ammo = GetAmmoCategory();
             var health = GetHealthCategory();
             var density = GetZombieDensityCategory();
+            var pickupDist = GetPickupCategory();
             
-            return new State(zombieDist, ammo, health, density);
+            return new State(zombieDist, ammo, health, density, pickupDist);
         }
         
         
@@ -116,9 +119,10 @@ namespace QLearning
             var ammo = Random.Range(0, 3);
             var health = Random.Range(0, 3);
             var density = Random.Range(0, 3);
+            var pickupDist = Random.Range(0, 3);
             
             
-            return new State(zombieDist, ammo, health,  density);
+            return new State(zombieDist, ammo, health,  density, pickupDist);
         }
         
         
@@ -127,7 +131,8 @@ namespace QLearning
             var actions = new List<Action>();
             actions.Add(new Action(Action.ActionType.HoldPosition));
 
-            var z = FindNearestZombie();
+            //nearest alerted zombies
+            var z = FindNearestZombie(alertedOnly: true);
             float d = z ? Vector3.Distance(agentTransform.position, z.transform.position) : float.MaxValue;
             
             //Will not flee if not close enough 
@@ -255,6 +260,20 @@ namespace QLearning
             
             return best;
         }
+        
+        
+        private int GetPickupCategory()
+        {
+            // Find the nearest pickup
+            
+            var p = FindBestPickup();   
+            if (!p) return 0;           // none on map
+            float d = Vector3.Distance(agentTransform.position, p.transform.position);
+            return d < pickupNearDistance ? 1 : 2;   // 1 = near, 2 = far
+        }
+        
+        
+        
 
         private GameObject FindBestPickup()
         {
@@ -299,12 +318,22 @@ namespace QLearning
         
         private void Shoot(GameObject target)
         {
+            //Alerts
+            foreach (var z in GameObject.FindGameObjectsWithTag("Zombie"))
+                if (Vector3.Distance(agentTransform.position, z.transform.position) < 12f)
+                    z.GetComponent<ZombieAI>()?.Alert();
+            
             //Stops
             navAgent.SetDestination(transform.position);
             
             float distance = Vector3.Distance(agentTransform.position, target.transform.position);
-            if (distance < shotRange)
+            
+            // stochastic hit chance based on distance
+            float hitChance = Mathf.Lerp(0.95f, 0.35f, distance / shotRange);
+            
+            if (distance < shotRange && Random.value < hitChance)
             {
+                
                 var zombie = target.GetComponent<ZombieAI>();
                 if (zombie)
                 {
@@ -316,6 +345,7 @@ namespace QLearning
                     }
                        
                 }
+                
             }
         }
 
@@ -363,7 +393,7 @@ namespace QLearning
         
         private int GetZombieDistanceCategory()
         {
-            nearestZombie = FindNearestZombie();
+            nearestZombie = FindNearestZombie(alertedOnly:true);
             
             if (!nearestZombie)
             {
@@ -403,8 +433,8 @@ namespace QLearning
             }
 
             if (nearbyCount <= 1) return 0;   // Alone or one zombie — safe
-            if (nearbyCount <= 3) return 1;   // 2–3 zombies — risky
-            return 2;                          // 4+ zombies — dangerous
+            if (nearbyCount <= 2) return 1;   // 2 zombies — risky
+            return 2;                          // 3+ zombies — dangerous
         }
         
         
@@ -451,7 +481,7 @@ namespace QLearning
         
        
         
-        private GameObject FindNearestZombie()
+        private GameObject FindNearestZombie(bool alertedOnly = false)
         {
             var zombies = GameObject.FindGameObjectsWithTag("Zombie");
             
@@ -460,6 +490,15 @@ namespace QLearning
             
             foreach (var z in zombies)
             {
+
+                if (alertedOnly)
+                {
+                    var ai = z.GetComponent<ZombieAI>();
+                    if(!ai || !ai.IsAlerted()) continue;
+                }
+                
+              
+                
                 var dist = Vector3.Distance(agentTransform.position, z.transform.position);
                 if (!(dist < minDist)) continue;
                 minDist = dist;
@@ -507,6 +546,8 @@ namespace QLearning
         {
             return (float)currentAmmo/maxAmmo;
         }
+        
+      
         
         public void TakeDamage(float damage, Vector3 sourcePos)
         {
@@ -606,7 +647,7 @@ namespace QLearning
         
         private void OnDrawGizmosSelected()
         {
-            if (agentTransform == null) return;
+            if (!agentTransform) return;
 
             /*// Density radius — cyan wire sphere
             Gizmos.color = new Color(0f, 1f, 1f, 0.4f);

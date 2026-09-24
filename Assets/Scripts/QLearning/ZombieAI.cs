@@ -7,6 +7,7 @@ namespace QLearning
     public class ZombieAI : MonoBehaviour
     {
     
+        [Header("Zombie Properties")]
         [SerializeField] private NavMeshAgent navMeshAgent;
         [SerializeField] private Transform targetAgent;
 
@@ -16,6 +17,16 @@ namespace QLearning
         [SerializeField] private float attackDamage = 15f;
         [SerializeField]private float attackCooldown = 1f;
         [SerializeField] private float rotationSpeed = 5f;
+        
+        
+        [Header("Detection")]
+        [SerializeField] private float detectionRadius = 8f;
+        [SerializeField] private float wanderSpeed = 1.5f;
+        [SerializeField] private float chaseSpeed = 3.3f;
+        [SerializeField] private float wanderRadius = 6f;
+        private bool _alerted;
+        private float _wanderTimer;
+        
         
         //Reinforcement Target
         private ReinforcementProblem _targetRP;
@@ -50,29 +61,55 @@ namespace QLearning
             
             if(!targetAgent) return;
             
-            if( attackCooldownTimer > 0f )
-            {
-                attackCooldownTimer -= Time.fixedDeltaTime;
-            }
+            if( attackCooldownTimer > 0f )  attackCooldownTimer -= Time.fixedDeltaTime; 
             
             
             float dist = FlatDistance(transform.position, targetAgent.position);
+            if (!_alerted && dist < detectionRadius) Alert();
 
-            if (dist <= attackDistance)
+            if (_alerted)
             {
-                if (attackCooldownTimer <= 0f && _targetRP)
+                if (dist <= attackDistance && attackCooldownTimer <= 0f && _targetRP)
                 {
                     _targetRP.TakeDamage(attackDamage, transform.position);
                     attackCooldownTimer = attackCooldown;
                 }
+
+                Chase();
             }
+
+            else Wander();
             
-            
-            //Consider limiting chase distance
-            Chase();
             
         }
 
+        private void Wander()
+        {
+            
+            navMeshAgent.speed = wanderSpeed;
+            _wanderTimer -= Time.fixedDeltaTime;
+            if (_wanderTimer > 0f && navMeshAgent.remainingDistance > 0.5f) return;
+            
+            
+            Vector3 p = transform.position + Random.insideUnitSphere * wanderRadius;
+            if (NavMesh.SamplePosition(p, out var hit, 2f, NavMesh.AllAreas))
+                navMeshAgent.SetDestination(hit.position);
+            
+            _wanderTimer = Random.Range(2f, 4f);
+            
+        }
+
+
+        public void Alert()
+        {
+            _alerted = true; 
+            navMeshAgent.speed = chaseSpeed;
+        }
+
+        public bool IsAlerted()
+        {
+            return _alerted;
+        }
 
         private void Attack()
         {

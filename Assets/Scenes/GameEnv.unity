@@ -334,26 +334,29 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   controlledByExperimentManager: 0
   loadSavedModel: 0
-  modelFileName: randomPol1
-  csvTrainedName: randomPol1
+  modelFileName: highExsmokeScreen800
+  csvTrainedName: highExsmokeScreen800
   playerModel: {fileID: 115344530}
   aiDirector: {fileID: 917447353}
   problem: {fileID: 115344531}
-  totalEpisodes: 200
+  totalEpisodes: 800
   alpha: 0.1
-  gamma: 0.8
+  gamma: 0.95
   rho: 1
   startingRho: 1
-  epsilonDecay: 1
-  minimumRho: 1
+  epsilonDecay: 0.997
+  minimumRho: 0.05
   isTraining: 1
-  decisionPeriod: 0.2
+  decisionPeriod: 0.5
   episodeTimeout: 120
   timeScale: 50
   store: {fileID: 115344529}
   logInterval: 1
   zombieSpawner: {fileID: 41375028}
   pickupSpawner: {fileID: 491440605}
+  evalEpisodes: 50
+  evalCsvName: eval_fingersCrossed
+  evalTimeScale: 50
 --- !u!114 &115344529
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -407,6 +410,7 @@ MonoBehaviour:
   nearDistance: 5
   mediumDistance: 9
   densityRadius: 9
+  pickupNearDistance: 8
   survivalReward: 0.02
   healthGainReward: 0.5
   healthLossPenalty: 3
@@ -661,6 +665,9 @@ MonoBehaviour:
   baseSpawnInterval: 5
   maxPickups: 12
   spawnAreaSize: {x: 25, y: 25}
+  minFromPlayer: 4
+  maxFromPlayer: 12
+  minFromZombies: 4
   spawnRate: 1
   activePickups: []
   player: {fileID: 0}
