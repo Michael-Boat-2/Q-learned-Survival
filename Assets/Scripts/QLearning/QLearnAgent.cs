@@ -274,7 +274,9 @@ namespace QLearning
                 problem.ShotsFired,
                 problem.Kills,
                 problem.HealthPickups,
-                problem.AmmoPickups
+                problem.AmmoPickups,
+                problem.TimeToFirstHit.ToString("F1", CultureInfo.InvariantCulture),
+                problem.MaxAlerted
                 ));
             
             
@@ -283,7 +285,9 @@ namespace QLearning
                 Debug.Log($"Ep {_episodesCompleted} | t={_episodeTimer:F1}s died={died} " +
                           $"hits={problem.DamageEvents} dmg={problem.DamageTaken:F0} " +
                           $"shots={problem.ShotsFired} kills={problem.Kills}" +
-                          $"h_pickups={problem.HealthPickups} a_pickups={problem.AmmoPickups}");
+                          $"h_pickups={problem.HealthPickups} a_pickups={problem.AmmoPickups}"+
+                          $"time to hit={problem.TimeToFirstHit} alerts={problem.MaxAlerted}"
+                          );
         
             
 
@@ -379,7 +383,8 @@ namespace QLearning
                 string name = _evaluating ? evalCsvName : csvTrainedName;
                 string path = Path.Combine(Application.streamingAssetsPath, name + ".csv");
                 
-                string header = "Episode;SurvivalTime;TotalReward;Died;DamageEvents;DamageTaken;ShotsFired;Kills;HealthPickups;AmmoPickups\n";
+                string header = "Episode;SurvivalTime;TotalReward;Died;DamageEvents;DamageTaken;ShotsFired;Kills;HealthPickups;AmmoPickups;+" +
+                                "TimeToFirstHit;MaxAlerted\n";
 
                 if (File.Exists(path))
                 {

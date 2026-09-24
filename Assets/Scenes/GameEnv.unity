@@ -334,18 +334,18 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   controlledByExperimentManager: 0
   loadSavedModel: 0
-  modelFileName: highExsmokeScreen800
-  csvTrainedName: highExsmokeScreen800
+  modelFileName: randomPol7
+  csvTrainedName: randomPol7
   playerModel: {fileID: 115344530}
   aiDirector: {fileID: 917447353}
   problem: {fileID: 115344531}
-  totalEpisodes: 800
+  totalEpisodes: 100
   alpha: 0.1
   gamma: 0.95
   rho: 1
   startingRho: 1
-  epsilonDecay: 0.997
-  minimumRho: 0.05
+  epsilonDecay: 1
+  minimumRho: 1
   isTraining: 1
   decisionPeriod: 0.5
   episodeTimeout: 120
@@ -409,7 +409,7 @@ MonoBehaviour:
   hurtHealth: 0.6
   nearDistance: 5
   mediumDistance: 9
-  densityRadius: 9
+  wallMargin: 3
   pickupNearDistance: 8
   survivalReward: 0.1
   healthGainReward: 0.3

@@ -81,6 +81,11 @@ namespace QLearning
         public int Kills { get; private set; }
         public int HealthPickups { get; private set; }
         public int AmmoPickups { get; private set; }
+        // -1 = never hit
+        public float TimeToFirstHit { get; private set; } = -1f;  
+        public int MaxAlerted { get; private set; }
+
+        private float _episodeTime;
         
         
         
@@ -96,6 +101,9 @@ namespace QLearning
         {
             if(fireTimer > 0) fireTimer -= Time.deltaTime;
             if (invulnTimer > 0) invulnTimer -= Time.deltaTime;
+            
+            
+            _episodeTime += Time.deltaTime;
         }
         
         
@@ -103,6 +111,8 @@ namespace QLearning
         //Returns state based on discrete vals of variables
         public State GetCurrentState()
         {
+            MaxAlerted = Mathf.Max(MaxAlerted, CountAlerted()); 
+            
             var zombieDist = GetZombieDistanceCategory();
             var ammo = GetAmmoCategory();
             var health = GetHealthCategory();
@@ -546,6 +556,8 @@ namespace QLearning
             
             if (invulnTimer > 0f || IsDead()) return;
             
+            if (TimeToFirstHit < 0f) TimeToFirstHit = _episodeTime;
+            
             player.UpdateHits();
             
             float applied = Mathf.Min(damage, currentHealth);
@@ -577,6 +589,17 @@ namespace QLearning
 
             navAgent.Warp(to);
             navAgent.ResetPath();   // cancel the current move; the agent picks a new action next tick
+        }
+        
+        private int CountAlerted()
+        {
+            int n = 0;
+            foreach (var z in GameObject.FindGameObjectsWithTag("Zombie"))
+            {
+                var ai = z.GetComponent<ZombieAI>();
+                if (ai && ai.IsAlerted()) n++;
+            }
+            return n;
         }
         
         
@@ -627,6 +650,10 @@ namespace QLearning
             zombieKilled = false;
             fireTimer = 0f;
             invulnTimer = 0f;
+            
+            _episodeTime = 0f;
+            TimeToFirstHit = -1f;
+            MaxAlerted = 0;
 
             //set back to start position
             navAgent.Warp(startPosition);

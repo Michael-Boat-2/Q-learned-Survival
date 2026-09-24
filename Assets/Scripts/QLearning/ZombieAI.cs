@@ -18,6 +18,9 @@ namespace QLearning
         [SerializeField]private float attackCooldown = 1f;
         [SerializeField] private float rotationSpeed = 5f;
         
+        [SerializeField] private float attackRecovery = 1f;
+        private float _recoverTimer;
+        
         
         [Header("Detection")]
         [SerializeField] private float detectionRadius = 8f;
