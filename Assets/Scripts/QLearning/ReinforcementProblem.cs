@@ -39,8 +39,8 @@ namespace QLearning
         [SerializeField] private float nearDistance;
         [SerializeField] private float mediumDistance;
         
-        [Header("Density Sensing")]
-        [SerializeField] private float densityRadius = 9f;
+        [Header("Wall Sensing")]
+        [SerializeField] private float wallMargin = 3f;
 
         [Header("Pickup Sensing")]
         [SerializeField] private float pickupNearDistance = 8f;
@@ -106,10 +106,10 @@ namespace QLearning
             var zombieDist = GetZombieDistanceCategory();
             var ammo = GetAmmoCategory();
             var health = GetHealthCategory();
-            var density = GetZombieDensityCategory();
+            var nearWall = GetNearWallCategory();
             var pickupDist = GetPickupCategory();
             
-            return new State(zombieDist, ammo, health, density, pickupDist);
+            return new State(zombieDist, ammo, health, nearWall, pickupDist);
         }
         
         
@@ -118,11 +118,11 @@ namespace QLearning
             var zombieDist = Random.Range(0, 3);
             var ammo = Random.Range(0, 3);
             var health = Random.Range(0, 3);
-            var density = Random.Range(0, 3);
+            var nearWall = Random.Range(0, 2);
             var pickupDist = Random.Range(0, 3);
             
             
-            return new State(zombieDist, ammo, health,  density, pickupDist);
+            return new State(zombieDist, ammo, health, nearWall, pickupDist);
         }
         
         
@@ -421,20 +421,12 @@ namespace QLearning
         
         
         
-        private int GetZombieDensityCategory()
+        // 1 if the agent is within wallMargin of the NavMesh edge (walls), else 0
+        private int GetNearWallCategory()
         {
-            var zombies = GameObject.FindGameObjectsWithTag("Zombie");
-            int nearbyCount = 0;
-
-            foreach (var z in zombies)
-            {
-                if (Vector3.Distance(agentTransform.position, z.transform.position) < densityRadius)
-                    nearbyCount++;
-            }
-
-            if (nearbyCount <= 1) return 0;   // Alone or one zombie — safe
-            if (nearbyCount <= 2) return 1;   // 2 zombies — risky
-            return 2;                          // 3+ zombies — dangerous
+            if (NavMesh.FindClosestEdge(agentTransform.position, out NavMeshHit hit, NavMesh.AllAreas))
+                return hit.distance < wallMargin ? 1 : 0;
+            return 0;
         }
         
         
@@ -651,7 +643,7 @@ namespace QLearning
 
             /*// Density radius — cyan wire sphere
             Gizmos.color = new Color(0f, 1f, 1f, 0.4f);
-            Gizmos.DrawWireSphere(agentTransform.position, densityRadius);*/
+            Gizmos.DrawWireSphere(agentTransform.position, 9f);*/
 
             // Near threshold — green wire sphere
             Gizmos.color = new Color(0f, 1f, 0f, 0.3f);
