@@ -170,7 +170,7 @@ MonoBehaviour:
   - {fileID: 1364725034}
   - {fileID: 1057659684}
   baseSpawnInterval: 2.5
-  maxZombies: 8
+  maxZombies: 7
   spawnAreaSize: {x: 25, y: 25}
   minSpawnDistance: 12
   spawnRate: 1
@@ -334,18 +334,18 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   controlledByExperimentManager: 0
   loadSavedModel: 0
-  modelFileName: please_r0
-  csvTrainedName: please_r0
+  modelFileName: Godplease_train0
+  csvTrainedName: Godplease_train0
   playerModel: {fileID: 115344530}
   aiDirector: {fileID: 917447353}
   problem: {fileID: 115344531}
-  totalEpisodes: 100
+  totalEpisodes: 400
   alpha: 0.1
   gamma: 0.95
   rho: 1
   startingRho: 1
-  epsilonDecay: 1
-  minimumRho: 1
+  epsilonDecay: 0.985
+  minimumRho: 0.02
   isTraining: 1
   decisionPeriod: 0.5
   episodeTimeout: 120
@@ -402,9 +402,14 @@ MonoBehaviour:
   currentAmmo: 8
   maxAmmo: 8
   shotRange: 9
-  fireRate: 2
-  invulnDuration: 0.75
+  fireRate: 1.5
+  invulnDuration: 1.25
   knockbackDistance: 2
+  dashSpeed: 8
+  dashDuration: 0.4
+  dashCooldown: 5
+  dashInvuln: 0.3
+  dashAcceleration: 100
   criticalHealth: 0.3
   hurtHealth: 0.6
   nearDistance: 5

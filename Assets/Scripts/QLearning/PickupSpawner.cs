@@ -27,12 +27,23 @@ namespace QLearning
         
         private float _spawnTimer;
         [SerializeField]private Transform player;
+
+        [Header("Need-Weighted Spawning")]
+        [SerializeField] private bool needWeighted = true;
+        // base weight per type; lower = need matters more (0.5 -> up to 75/25 split)
+        [SerializeField] private float baseTypeWeight = 0.5f;
+        [SerializeField] private ReinforcementProblem agent;
         
         private void Start()
         {
             if (!player)
             {
                 player = GameObject.FindGameObjectWithTag("Player")?.transform;
+            }
+
+            if (!agent)
+            {
+                agent = FindFirstObjectByType<ReinforcementProblem>();
             }
            
         }
@@ -48,7 +59,7 @@ namespace QLearning
 
             if (!(_spawnTimer <= 0f)) return;
             
-            var type = Random.value < 0.5f ? PickupType.Health : PickupType.Ammo;
+            var type = ChoosePickupType();
                 
             SpawnPickup(type);
                 
@@ -56,6 +67,19 @@ namespace QLearning
             _spawnTimer = interval < 2f ? 2f : interval;
         }
         
+        // Health vs ammo chosen by the agent's current need (falls back to 50/50)
+        private PickupType ChoosePickupType()
+        {
+            if (!needWeighted || !agent)
+                return Random.value < 0.5f ? PickupType.Health : PickupType.Ammo;
+
+            float healthW = baseTypeWeight + (1f - agent.GetHealthRatio());
+            float ammoW = baseTypeWeight + (1f - agent.GetAmmoRatio());
+
+            float pHealth = healthW / (healthW + ammoW);
+            return Random.value < pHealth ? PickupType.Health : PickupType.Ammo;
+        }
+
         private void SpawnPickup(PickupType type)
         {
 
