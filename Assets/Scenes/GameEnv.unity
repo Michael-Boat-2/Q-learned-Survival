@@ -169,7 +169,7 @@ MonoBehaviour:
   - {fileID: 965152990}
   - {fileID: 1364725034}
   - {fileID: 1057659684}
-  baseSpawnInterval: 2
+  baseSpawnInterval: 3
   maxZombies: 12
   spawnAreaSize: {x: 25, y: 25}
   minDistanceFromPlayer: 5
@@ -334,20 +334,22 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   controlledByExperimentManager: 0
   loadSavedModel: 0
-  modelFileName: nuu_baseline_800
-  csvTrainedName: nuu_baseline_800
+  modelFileName: randomPol1
+  csvTrainedName: randomPol1
   playerModel: {fileID: 115344530}
   aiDirector: {fileID: 917447353}
   problem: {fileID: 115344531}
-  totalEpisodes: 800
+  totalEpisodes: 200
   alpha: 0.1
   gamma: 0.8
-  rho: 0.1
-  startingRho: 0.1
+  rho: 1
+  startingRho: 1
+  epsilonDecay: 1
+  minimumRho: 1
   isTraining: 1
   decisionPeriod: 0.2
-  episodeTimeout: 30
-  timeScale: 1
+  episodeTimeout: 120
+  timeScale: 50
   store: {fileID: 115344529}
   logInterval: 1
   zombieSpawner: {fileID: 41375028}
@@ -396,7 +398,7 @@ MonoBehaviour:
   maxHealth: 100
   currentAmmo: 6
   maxAmmo: 6
-  shotRange: 11
+  shotRange: 9
   fireRate: 2
   criticalHealth: 0.3
   hurtHealth: 0.6
@@ -407,7 +409,7 @@ MonoBehaviour:
   healthLossPenalty: 0.7
   ammoPickupReward: 0.2
   killReward: 3
-  deathPenalty: 0
+  deathPenalty: 10
   player: {fileID: 115344530}
 --- !u!195 &115344532
 NavMeshAgent:
@@ -653,8 +655,8 @@ MonoBehaviour:
   healthPickupPrefab: {fileID: 1873131441143402161, guid: bc8f3ef486f454d48b093f9db7553071, type: 3}
   ammoPickupPrefab: {fileID: 5360657179506792335, guid: 8fb3cfe92de785b4f8aa9d0314876b7b, type: 3}
   spawnPoints: []
-  baseSpawnInterval: 10
-  maxPickups: 3
+  baseSpawnInterval: 5
+  maxPickups: 12
   spawnAreaSize: {x: 25, y: 25}
   spawnRate: 1
   activePickups: []

@@ -62,7 +62,7 @@ namespace QLearning
             {
                 if (attackCooldownTimer <= 0f && _targetRP)
                 {
-                    _targetRP.TakeDamage(attackDamage);
+                    _targetRP.TakeDamage(attackDamage, transform.position);
                     attackCooldownTimer = attackCooldown;
                 }
             }

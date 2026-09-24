@@ -14,12 +14,14 @@ namespace QLearning
         [SerializeField] private bool controlledByExperimentManager = false;
         
         //Inference Mode
+        [Header("Inference")]
         [SerializeField] private bool loadSavedModel = false;
         [SerializeField] private string modelFileName = "trained";
         [SerializeField] private string csvTrainedName = "trained";
         
         
         //Director and player
+        [Header("References")]
         [SerializeField] private PlayerModel playerModel;
         [SerializeField] private AIDirector aiDirector;
         
@@ -27,23 +29,26 @@ namespace QLearning
         //needs a reinforcement problem
         [SerializeField]private ReinforcementProblem problem;
         
-        //iterations
-        //[SerializeField] private int iterations = 1000;
-        //private int _currentIteration = 0;
+      
+        [Header("Training Settings")]
         [SerializeField] private int totalEpisodes = 800;
         
         [SerializeField] private float alpha = 0.1f;
         [SerializeField] private float gamma = 0.8f;
         [SerializeField] private float rho = 0.1f;
         [SerializeField] private float startingRho = 0.1f;
+
+        [SerializeField] private float epsilonDecay;
+
+        [SerializeField] private float minimumRho = 0.1f;
         //[SerializeField] private float nu = 0.01f;
         
         //training
         [SerializeField] private bool isTraining = true;
-        [SerializeField] private float decisionPeriod = 0.2f;
+        [SerializeField] private float decisionPeriod;
          private float _decisionTimer = 0f;
          
-        [SerializeField] private float episodeTimeout = 30f;
+        [SerializeField] private float episodeTimeout;
 
         [SerializeField] private float timeScale;
         
@@ -57,7 +62,7 @@ namespace QLearning
         
         
         //Analysis
-        [SerializeField] private int logInterval = 25;
+        [SerializeField] private int logInterval;
         private StringBuilder trainingLog = new StringBuilder();
         
         
@@ -205,21 +210,37 @@ namespace QLearning
             // applying terminal Q-update for the last action
             if (_pendingUpdate)
             {
-                float terminalReward = problem.ComputeIntervalReward();
-                _totalEpisodeRewards += terminalReward;
+                float r = problem.ComputeIntervalReward();
+                _totalEpisodeRewards += r;
 
                 float oldQ = store.GetQValue(_lastState, _lastAction);
-                // Terminal state: no future, so no gamma * maxNextQ term
-                float newQ = (1 - alpha) * oldQ + alpha * terminalReward;
+                float target;
+
+                if (problem.IsDead())
+                {
+                    // Terminal state: no future, so no gamma * maxNextQ term
+                    target = r;
+                }
+                else
+                {
+                    //timeout, so we will still bootstrap from current state
+                    State s = problem.GetCurrentState();
+                    var acts = problem.GetAvailableActions(s);
+                    target = r + gamma * store.GetQValue(s,BestAvailable(s, acts));
+                }
+                
+               
+                float newQ = (1 - alpha) * oldQ + alpha * target;
                 store.StoreQValue(_lastState, _lastAction, newQ);
 
                 _pendingUpdate = false;
+                
             }
             
             _episodesCompleted++;
             
             // epsilon(rho) decay
-            rho = Mathf.Max(0.01f, rho * 0.995f);
+            rho = Mathf.Max(0.01f, rho * epsilonDecay);
             
             
             bool died = problem.IsDead();
@@ -258,6 +279,8 @@ namespace QLearning
             //observe current state S_t
             State state = problem.GetCurrentState();
             //Action action;
+            //list of available actions based on state
+            List<Action> actions = problem.GetAvailableActions(state);
             
             // compute reward accumulated reward from t-1 to t, for action at t - 1
             float intervalReward = problem.ComputeIntervalReward();
@@ -268,7 +291,9 @@ namespace QLearning
             if (_pendingUpdate)
             {
                 float oldQ = store.GetQValue(_lastState, _lastAction);
-                float maxNextQ = store.GetQValue(state, store.GetBestAction(state));
+                
+                //bootstraps with the best available action in the next state
+                float maxNextQ = store.GetQValue(state, BestAvailable(state, actions));
                 float newQ = (1 - alpha) * oldQ + alpha * (intervalReward + gamma * maxNextQ);
                 store.StoreQValue(_lastState, _lastAction, newQ);
             }
@@ -276,12 +301,7 @@ namespace QLearning
             //snapshot baselines before choosing/executing to correctly measure effects of action to take
             problem.SnapshotForReward();
             
-            
-            //chose action a_t using current state
-            
-            //list of available actions based on state
-            List<Action> actions = problem.GetAvailableActions(state);
-            
+    
             //use a random action this time?    //or use best action available
             Action action = (Random.value < rho) ? OneOf(actions) : store.GetBestAction(state);
                 
@@ -300,10 +320,39 @@ namespace QLearning
         private Action OneOf(List<Action> actions)
         {
             if (actions == null || actions.Count == 0)
-                return new Action(Action.ActionType.Flee);
+                
+                // defaulting to Hold position
+                return new Action(Action.ActionType.HoldPosition);
                 
             return actions[Random.Range(0, actions.Count)];
         }
+
+
+        //we need to pick and bootstrap from actions that are available
+        public Action BestAvailable(State s, List<Action> available)
+        {
+            Action best = available[0];
+            
+            float bestQ = store.GetQValue(s,best);
+
+
+            for (int i = 1; i < available.Count; i++)
+            {
+                float q = store.GetQValue(s,available[i]);
+                if (q > bestQ)
+                {
+                    bestQ = q; 
+                    best = available[i];
+                }
+
+            }
+            
+            return best;
+        }
+        
+        
+        
+        
 
         private void StoreTrainingData()
         {

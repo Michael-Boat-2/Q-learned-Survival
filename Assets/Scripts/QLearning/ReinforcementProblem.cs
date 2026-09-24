@@ -23,6 +23,12 @@ namespace QLearning
         [SerializeField]private float shotRange;
         [SerializeField]private float fireRate;
         
+        [Header("Hit Response")]
+        [SerializeField] private float invulnDuration = 0.75f;
+        [SerializeField] private float knockbackDistance = 2f;
+        private float invulnTimer;
+        
+        
         [Header("Agent Discrete Thresholds")]
         
         //Health threshold
@@ -84,8 +90,8 @@ namespace QLearning
 
         private void Update()
         {
-            if(fireTimer > 0)
-             fireTimer -= Time.deltaTime;
+            if(fireTimer > 0) fireTimer -= Time.deltaTime;
+            if (invulnTimer > 0) invulnTimer -= Time.deltaTime;
         }
         
         
@@ -117,20 +123,21 @@ namespace QLearning
         public List<Action> GetAvailableActions(State state)
         {
             var actions = new List<Action>();
-            
             actions.Add(new Action(Action.ActionType.HoldPosition));
-            actions.Add(new Action(Action.ActionType.Flee));
-            actions.Add(new Action(Action.ActionType.MoveToPickup));
+
+            var z = FindNearestZombie();
+            float d = z ? Vector3.Distance(agentTransform.position, z.transform.position) : float.MaxValue;
             
-            var target = FindNearestZombie();
+            //Will not flee if not close enough 
+            if(d < mediumDistance)
+                actions.Add(new Action(Action.ActionType.Flee));
+              
+            //Only move to pickups if they exist
+            if(FindNearestPickup())
+                actions.Add(new Action(Action.ActionType.MoveToPickup));
             
-            //bool inRange = target && Vector3.Distance(agentTransform.position, target.transform.position) < shotRange;
-            
-            //allow shooting availability out of range
-            bool inRange = target;
-            
-            // Shoot action requires ammo, an enemy and fire rate control
-            if (currentAmmo > 0 && inRange && fireTimer <= 0)
+            // Shoot action requires ammo, an enemy and fire rate control, prevents shot wasting
+            if (currentAmmo > 0 && d < shotRange && fireTimer <= 0)
                 actions.Add(new Action(Action.ActionType.Shoot));
             
             return actions;
@@ -153,27 +160,6 @@ namespace QLearning
         
         
         
-        /*
-        public (float reward, State newState) TakeActions(State state, Action action)
-        {
-            //Compute reward for the interval since the last decision
-            var reward = CalculateReward();
-            
-            zombieKilled = false;
-            //Take action
-            ExecuteAction(action);
-            
-            //update baselines for next reward interval
-            prevHealth = currentHealth;
-            prevAmmo = currentAmmo;
-            
-            
-            State newState = GetCurrentState();
-            return (reward, newState);
-        }
-        */
-        
-        
         //Execute action
         public void ExecuteAction(Action action)
         {
@@ -187,12 +173,8 @@ namespace QLearning
                 
                 
                 case Action.ActionType.Flee:
-                    var enemy = FindNearestZombie();
-                    if (enemy)
-                    {
-                        Vector3 direction = (agentTransform.position - enemy.transform.position).normalized;
-                        Move(agentTransform.position + direction * mediumDistance);
-                    }
+                    
+                    Move(FindSafestPoint());
                     break;
                     
                 case Action.ActionType.MoveToPickup:
@@ -232,9 +214,42 @@ namespace QLearning
         
         private void Move(Vector3 target)
         {
-            
             navAgent.SetDestination(target);
-          
+        }
+
+        private Vector3 FindSafestPoint()
+        {
+            var zombies = GameObject.FindGameObjectsWithTag("Zombie");
+            Vector3 pos = agentTransform.position;
+            Vector3 best = pos;
+            
+            float bestScore = float.MinValue;
+            
+            
+            for (int i = 0; i < 8; i++)   // test 8 directions around the agent
+            {
+                float ang = i * 45f * Mathf.Deg2Rad;
+                Vector3 target = pos + new Vector3(Mathf.Cos(ang), 0, Mathf.Sin(ang)) * mediumDistance;
+
+                // clip to walls
+                if (NavMesh.Raycast(pos, target, out NavMeshHit hit, NavMesh.AllAreas))
+                    target = hit.position;
+
+                // score = distance to the closest zombie from that point
+                float minD = float.MaxValue;
+                foreach (var z in zombies)
+                    minD = Mathf.Min(minD, Vector3.Distance(target, z.transform.position));
+
+                // prefer points that actually move
+                float score = minD + 0.2f * Vector3.Distance(pos, target);
+                if (score > bestScore)
+                {
+                    bestScore = score;
+                    best = target;
+                }
+
+                return best;
+            }
             
         }
         
@@ -450,8 +465,10 @@ namespace QLearning
             return (float)currentAmmo/maxAmmo;
         }
         
-        public void TakeDamage(float damage)
+        public void TakeDamage(float damage, Vector3 sourcePos)
         {
+            
+            if (invulnTimer > 0f || IsDead()) return;
             
             player.UpdateHits();
             
@@ -460,9 +477,33 @@ namespace QLearning
 
             DamageEvents++;
             DamageTaken += applied;
-
-
+            
+            invulnTimer = invulnDuration;
+            Knockback(sourcePos);
+            
         }
+        
+        
+        private void Knockback(Vector3 sourcePos)
+        {
+            Vector3 dir = agentTransform.position - sourcePos;
+            dir.y = 0;
+            if (dir.sqrMagnitude < 0.01f) dir = Random.insideUnitSphere;
+            dir.y = 0;
+            dir.Normalize();
+
+            Vector3 from = agentTransform.position;
+            Vector3 to = from + dir * knockbackDistance;
+
+            // NavMesh.Raycast stops at walls/edges, so a cornered agent is pushed only as far as it can go
+            if (NavMesh.Raycast(from, to, out NavMeshHit hit, NavMesh.AllAreas))
+                to = hit.position;
+
+            navAgent.Warp(to);
+            navAgent.ResetPath();   // cancel the current move; the agent picks a new action next tick
+        }
+        
+        
         
         public void Heal(float amount)
         {
@@ -504,6 +545,7 @@ namespace QLearning
             prevAmmo = currentAmmo;
             zombieKilled = false;
             fireTimer = 0f;
+            invulnTimer = 0f;
 
             //set back to start position
             navAgent.Warp(startPosition);
