@@ -82,6 +82,9 @@ namespace QLearning
         
         private GameObject nearestZombie;
         //private GameObject nearestPickup;
+        
+        //animator
+        private CharacterAnimator _characterAnimator;
 
         //private float rewardScale = 1f;
         
@@ -108,6 +111,9 @@ namespace QLearning
             baseAcceleration = navAgent.acceleration;
             prevHealth = currentHealth;
             prevAmmo = currentAmmo;
+            
+            
+            _characterAnimator = GetComponent<CharacterAnimator>();
         }
 
 
@@ -383,6 +389,13 @@ namespace QLearning
             
             //Stops
             navAgent.SetDestination(transform.position);
+            
+            // play a shoot
+            if(Mathf.Approximately(Time.timeScale, 1))
+                _characterAnimator?.PlayShoot();
+            
+            // send out a particle effect? make noise ?
+            
             
             float distance = Vector3.Distance(agentTransform.position, target.transform.position);
             

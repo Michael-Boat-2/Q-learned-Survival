@@ -37,6 +37,8 @@ namespace QLearning
      
         private Animator _animator;
         private float attackCooldownTimer = 0;
+        
+        private CharacterAnimator _characterAnimator;
      
     
         // Start is called once before the first execution of Update after the MonoBehaviour is created
@@ -54,6 +56,9 @@ namespace QLearning
             
             //Zombie must be able to physically get within attack range
             navMeshAgent.stoppingDistance = attackDistance * 0.8f;
+            
+            
+            _characterAnimator =  GetComponent<CharacterAnimator>();
             
         }
 
@@ -90,6 +95,11 @@ namespace QLearning
                     
                     //stop chasing for some time
                     _recoverTimer = attackRecovery;
+                    
+                    
+                    //animate if timescale is safe
+                    if(Mathf.Approximately(Time.timeScale, 1))
+                       _characterAnimator?.PlayAttack();
                 }
 
                 Chase();
@@ -143,6 +153,10 @@ namespace QLearning
             navMeshAgent.isStopped = true;
         
             attackCooldownTimer = attackCooldown;
+            
+            
+           
+            
         
         }
  

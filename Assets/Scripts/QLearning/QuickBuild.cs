@@ -18,10 +18,14 @@ public class QuickBuild : MonoBehaviour
         
     }
 
+    public void SceneManagerLoad()
+    {
+        SceneManager.LoadScene(1);
+    }
 
     public void Retry()
     {
-        SceneManager.LoadScene(0);
+        SceneManager.LoadScene(1);
     }
 
     public void Quit()

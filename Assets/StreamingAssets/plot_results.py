@@ -171,6 +171,94 @@ fig.savefig(OUTPUT_DIR / "fig4_eval_vs_random.png", dpi=200)
 plt.close(fig)
 
 
+# ============= GENERIC HELPERS (any metric) =============
+def per_condition(metric, ylabel, title, fname, ylim=None, show_timeout=False):
+    """2x2 small multiples: one panel per condition, random median as reference."""
+    fig, axes = plt.subplots(2, 2, figsize=(11, 7.5), sharex=True, sharey=True)
+    for ax, d in zip(axes.flat, DIFFICULTIES):
+        c = COLORS[d]
+        if data[d]["train"]:
+            ep, m, lo, hi = curve(data[d]["train"], metric, SMOOTH)
+            ax.fill_between(ep, lo, hi, color=c, alpha=0.2, linewidth=0, label="Seed range")
+            ax.plot(ep, m, color=c, linewidth=2, label=f"Q-learning (mean of {len(data[d]['train'])} seeds)")
+        r = data[d]["random"]
+        if r is not None and metric in r:
+            rm = r[metric].median()
+            ax.axhline(rm, color=INK2, linestyle="--", linewidth=1.2, label=f"Random policy median ({rm:.1f})")
+        if show_timeout:
+            ax.axhline(TIMEOUT, color=INK2, linestyle=":", linewidth=1)
+        ax.set_title(LABELS[d], color=INK, loc="left", fontweight="bold")
+        if ylim:
+            ax.set_ylim(*ylim)
+        ax.legend(loc="lower right", fontsize=8)
+    for ax in axes[1]:
+        ax.set_xlabel("Episode")
+    for ax in axes[:, 0]:
+        ax.set_ylabel(f"{ylabel}, {SMOOTH}-ep rolling mean")
+    fig.suptitle(title, color=INK, fontsize=13, x=0.01, ha="left")
+    fig.tight_layout()
+    fig.savefig(OUTPUT_DIR / fname, dpi=200)
+    plt.close(fig)
+
+
+def overlay(ax, metric, ylabel, title, label_ends=True):
+    """All conditions on one axis, direct-labelled line ends."""
+    last_ep = None
+    for d in DIFFICULTIES:
+        if not data[d]["train"]:
+            continue
+        ep, m, lo, hi = curve(data[d]["train"], metric, SMOOTH)
+        ax.fill_between(ep, lo, hi, color=COLORS[d], alpha=0.15, linewidth=0)
+        ax.plot(ep, m, color=COLORS[d], linewidth=2, label=LABELS[d])
+        if label_ends:
+            ax.text(ep[-1] + 8, m[-1], LABELS[d], color=INK, fontsize=8, va="center")
+        last_ep = ep[-1]
+    if last_ep is not None:
+        ax.set_xlim(0, last_ep * 1.15)
+    ax.set_xlabel("Episode")
+    ax.set_ylabel(f"{ylabel}, {SMOOTH}-ep rolling mean")
+    ax.set_title(title, loc="left", color=INK)
+
+
+# Derived column: total pickups
+for d in DIFFICULTIES:
+    for df in data[d]["train"] + data[d]["eval"] + ([data[d]["random"]] if data[d]["random"] is not None else []):
+        df["Pickups"] = df["HealthPickups"] + df["AmmoPickups"]
+
+
+# ============= FIG 5 & 6: RETURN (TOTAL REWARD) =============
+per_condition("TotalReward", "Episode return", "Episode return by difficulty condition",
+              "fig5_return_per_condition.png")
+
+fig, ax = plt.subplots(figsize=(10, 5.5))
+overlay(ax, "TotalReward", "Episode return",
+        "Episode return across conditions (mean of seeds, band = seed range)")
+ax.axhline(0, color=INK2, linewidth=0.8)
+ax.legend(loc="lower right")
+fig.tight_layout()
+fig.savefig(OUTPUT_DIR / "fig6_return_cross_condition.png", dpi=200)
+plt.close(fig)
+
+
+# ============= FIG 7: BEHAVIOUR METRICS (small multiples) =============
+BEHAVIOUR = [
+    ("Kills", "Kills", "Kills per episode"),
+    ("Pickups", "Pickups", "Pickups collected per episode"),
+    ("DamageTaken", "Damage taken", "Damage taken per episode"),
+    ("DashesUsed", "Dashes", "Dashes per episode"),
+]
+fig, axes = plt.subplots(2, 2, figsize=(12, 8))
+for ax, (metric, ylab, title) in zip(axes.flat, BEHAVIOUR):
+    overlay(ax, metric, ylab, title, label_ends=False)
+    ax.set_xlim(0, None)
+handles, labels = axes.flat[0].get_legend_handles_labels()
+fig.legend(handles, labels, loc="upper right", ncol=4, fontsize=9)
+fig.suptitle("Learned behaviour over training", color=INK, fontsize=13, x=0.01, ha="left")
+fig.tight_layout(rect=(0, 0, 1, 0.96))
+fig.savefig(OUTPUT_DIR / "fig7_behaviour.png", dpi=200)
+plt.close(fig)
+
+
 # ============= STATS =============
 def iqr(x):
     return f"{np.percentile(x, 25):.1f}-{np.percentile(x, 75):.1f}"
