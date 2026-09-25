@@ -85,6 +85,7 @@ namespace QLearning
         
         //animator
         private CharacterAnimator _characterAnimator;
+        private ShootVisuals _shootVisuals;   // visual only: face target + muzzle flash
 
         //private float rewardScale = 1f;
         
@@ -114,6 +115,7 @@ namespace QLearning
             
             
             _characterAnimator = GetComponent<CharacterAnimator>();
+            _shootVisuals = GetComponent<ShootVisuals>();
         }
 
 
@@ -394,7 +396,8 @@ namespace QLearning
             if(Mathf.Approximately(Time.timeScale, 1))
                 _characterAnimator?.PlayShoot();
             
-            // send out a particle effect? make noise ?
+            // face the target + muzzle flash (visual only, no gameplay effect)
+            if (_shootVisuals) _shootVisuals.OnShoot(target.transform.position);
             
             
             float distance = Vector3.Distance(agentTransform.position, target.transform.position);
