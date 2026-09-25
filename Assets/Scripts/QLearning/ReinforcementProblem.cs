@@ -609,6 +609,9 @@ namespace QLearning
             return currentAmmo;
         }
 
+        public int MaxAmmo => maxAmmo;
+        public float MaxHealth => maxHealth;
+
         public float GetAmmoRatio()
         {
             return (float)currentAmmo/maxAmmo;

@@ -1,10 +1,15 @@
 using UnityEngine;
 using UnityEngine.AI;
 
+/// <summary>
+/// Visual-only shooting feedback: turns the agent to face its target and plays a muzzle flash.
+/// Put this on the agent ROOT (same object as ReinforcementProblem / NavMeshAgent).
+/// ReinforcementProblem.Shoot() calls OnShoot(targetPos). No effect on gameplay or learning.
+/// </summary>
 public class ShootVisuals : MonoBehaviour
 {
     [Header("Facing")]
-    [SerializeField] private NavMeshAgent agent;             
+    [SerializeField] private NavMeshAgent agent;              // auto-found if empty
     [Tooltip("Seconds to keep facing the target after a shot (agent rotation is paused meanwhile).")]
     [SerializeField] private float faceDuration = 0.4f;
     [Tooltip("Degrees per second. 0 = snap instantly.")]
@@ -13,14 +18,10 @@ public class ShootVisuals : MonoBehaviour
     [Header("Muzzle Flash")]
     [Tooltip("Empty child at the tip of the gun barrel. Parent it to the weapon/hand bone so it follows the animation.")]
     [SerializeField] private Transform muzzlePoint;
-    [Tooltip("Option A: a particle system already placed as a child of the muzzle point.")]
-    [SerializeField] private ParticleSystem muzzleFlashChild;
-    /*[Tooltip("Option B: a prefab spawned at the muzzle point each shot (used if no child is set).")]
+
+
     [SerializeField] private GameObject muzzleFlashPrefab;
     [SerializeField] private float prefabLifetime = 1f;
-    [Tooltip("Optional short light burst (a disabled Point Light at the muzzle).")]
-    [SerializeField] private Light flashLight;
-    [SerializeField] private float lightDuration = 0.05f;*/
 
     [Header("Extras")]
     [SerializeField] private float cameraShake = 0.1f;        // 0 = off
@@ -29,12 +30,12 @@ public class ShootVisuals : MonoBehaviour
 
     private Vector3 _faceTarget;
     private float _faceTimer;
-    //private float _lightTimer;
+   
 
     private void Awake()
     {
         if (!agent) agent = GetComponent<NavMeshAgent>();
-        //if (flashLight) flashLight.enabled = false;
+      
     }
 
     public void OnShoot(Vector3 targetPos)
@@ -47,13 +48,14 @@ public class ShootVisuals : MonoBehaviour
         if (agent) agent.updateRotation = false;
         if (turnSpeed <= 0f) RotateTowards(float.MaxValue);
 
-       
-        if (muzzleFlashChild)
+  
+        if (muzzleFlashPrefab && muzzlePoint)
         {
-            muzzleFlashChild.Play(true);
+            var fx = Instantiate(muzzleFlashPrefab, muzzlePoint.position, muzzlePoint.rotation, muzzlePoint);
+            Destroy(fx, prefabLifetime);
         }
-    
 
+      
         if (cameraShake > 0f) CameraFollow.Instance?.Shake(cameraShake);
     }
 
@@ -63,11 +65,11 @@ public class ShootVisuals : MonoBehaviour
         {
             _faceTimer -= Time.deltaTime;
             RotateTowards(turnSpeed * Time.deltaTime);
-            // hand rotation back to NavMeshAgent
-            if (_faceTimer <= 0f && agent) agent.updateRotation = true; 
+            if (_faceTimer <= 0f && agent) agent.updateRotation = true;   // hand rotation back to NavMeshAgent
         }
 
-  
+      
+       
     }
 
     private void RotateTowards(float maxDegrees)
@@ -82,6 +84,6 @@ public class ShootVisuals : MonoBehaviour
     private void OnDisable()
     {
         if (agent) agent.updateRotation = true;
-        // if (flashLight) flashLight.enabled = false;
+    
     }
 }

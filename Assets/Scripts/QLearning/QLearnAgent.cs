@@ -176,6 +176,16 @@ namespace QLearning
         
         public bool IsTraining() => isTraining;
 
+        // --- read-only info for UI ---
+        private int _wins;
+        public int EpisodesCompleted => _episodesCompleted;
+        public int TotalEpisodes => totalEpisodes;
+        public float EpisodeTime => _episodeTimer;
+        public float EpisodeTimeout => episodeTimeout;
+        public int Wins => _wins;
+        public float WinRate => _episodesCompleted > 0 ? (float)_wins / _episodesCompleted : 0f;
+        public string Mode => _evaluating ? "Evaluation" : (_randomRun ? "Random" : "Training");
+
         public void SetRunNames(string csvName, string modelName)
         {
             csvTrainedName = csvName;
@@ -194,6 +204,7 @@ namespace QLearning
 
             rho = startingRho;
             alpha = _initialAlpha;
+            _wins = 0;
             
             _episodesCompleted = 0;
             _episodeTimer = 0f;
@@ -243,6 +254,7 @@ namespace QLearning
         private void ResetRunCounters()
         {
             _episodesCompleted = 0;
+            _wins = 0;
             _episodeTimer = 0f;
             _decisionTimer = 0f;
             _totalEpisodeRewards = 0f;
@@ -322,6 +334,7 @@ namespace QLearning
             
             
             bool died = problem.IsDead();
+            if (!died) _wins++;
             
             
             //Log information about training
