@@ -34,6 +34,10 @@ namespace QLearning
         [SerializeField] private int totalEpisodes = 800;
         
         [SerializeField] private float alpha = 0.1f;
+        // per-episode multiplier for alpha; 1 = constant learning rate
+        //[SerializeField] private float alphaDecay = 1f;
+        //[SerializeField] private float minimumAlpha = 0.01f;
+        private float _initialAlpha;
         [SerializeField] private float gamma = 0.8f;
         [SerializeField] private float rho = 0.1f;
         [SerializeField] private float startingRho = 0.1f;
@@ -91,12 +95,18 @@ namespace QLearning
         // set be set to 1 in order to watch behaviours
         [SerializeField] private float evalTimeScale = 50f;   
         private bool _evaluating = false;
+        private bool _randomRun = false;      // pure random policy run (baseline)
+        private int _trainEpisodes;
+        private float _trainMinimumRho;
         
         
         
         
         private void Start()
         {
+            _initialAlpha = alpha;
+            _trainEpisodes = totalEpisodes;
+            _trainMinimumRho = minimumRho;
             
             Time.timeScale = timeScale;
 
@@ -176,7 +186,14 @@ namespace QLearning
         public void BeginTraining()
         {
             // Reset per-run state
+            _evaluating = false;
+            _randomRun = false;
+            totalEpisodes = _trainEpisodes;
+            minimumRho = _trainMinimumRho;
+            Time.timeScale = timeScale;
+
             rho = startingRho;
+            alpha = _initialAlpha;
             
             _episodesCompleted = 0;
             _episodeTimer = 0f;
@@ -191,6 +208,50 @@ namespace QLearning
         }
         
         
+        // Greedy evaluation of a saved Q-table (no learning, no saving)
+        public void BeginEvaluation(string modelName, string evalName)
+        {
+            store.LoadFromFile(modelName);
+            _evaluating = true;
+            _randomRun = false;
+            evalCsvName = evalName;
+            totalEpisodes = evalEpisodes;
+            Time.timeScale = evalTimeScale;
+            rho = 0f;
+
+            ResetRunCounters();
+            Debug.Log($"QLearnAgent: Evaluating '{modelName}' for {evalEpisodes} episodes");
+            StartNewEpisode();
+        }
+
+        // Pure random-policy baseline (rho fixed at 1, Q-table not saved)
+        public void BeginRandomBaseline(string csvName, int episodes)
+        {
+            _evaluating = false;
+            _randomRun = true;
+            csvTrainedName = csvName;
+            totalEpisodes = episodes;
+            Time.timeScale = timeScale;
+            rho = 1f;
+            minimumRho = 1f;
+
+            ResetRunCounters();
+            Debug.Log($"QLearnAgent: Random baseline '{csvName}' for {episodes} episodes");
+            StartNewEpisode();
+        }
+
+        private void ResetRunCounters()
+        {
+            _episodesCompleted = 0;
+            _episodeTimer = 0f;
+            _decisionTimer = 0f;
+            _totalEpisodeRewards = 0f;
+            _pendingUpdate = false;
+            trainingLog.Clear();
+            isTraining = true;
+        }
+
+
         private void StartNewEpisode()
         {
             //resetting problem adequately
@@ -254,7 +315,10 @@ namespace QLearning
             
             // epsilon(rho) decay
             if(!_evaluating)
-             rho = Mathf.Max(minimumRho, rho * epsilonDecay);
+            {
+                rho = Mathf.Max(minimumRho, rho * epsilonDecay);
+                //alpha = Mathf.Max(minimumAlpha, alpha * alphaDecay);
+            }
             
             
             bool died = problem.IsDead();
@@ -276,7 +340,8 @@ namespace QLearning
                 problem.HealthPickups,
                 problem.AmmoPickups,
                 problem.TimeToFirstHit.ToString("F1", CultureInfo.InvariantCulture),
-                problem.MaxAlerted
+                problem.MaxAlerted,
+                problem.DashesUsed
                 ));
             
             
@@ -286,7 +351,7 @@ namespace QLearning
                           $"hits={problem.DamageEvents} dmg={problem.DamageTaken:F0} " +
                           $"shots={problem.ShotsFired} kills={problem.Kills}" +
                           $"h_pickups={problem.HealthPickups} a_pickups={problem.AmmoPickups}"+
-                          $"time to hit={problem.TimeToFirstHit} alerts={problem.MaxAlerted}"
+                          $"time to hit={problem.TimeToFirstHit} alerts={problem.MaxAlerted} dashes={problem.DashesUsed}"
                           );
         
             
@@ -383,8 +448,8 @@ namespace QLearning
                 string name = _evaluating ? evalCsvName : csvTrainedName;
                 string path = Path.Combine(Application.streamingAssetsPath, name + ".csv");
                 
-                string header = "Episode;SurvivalTime;TotalReward;Died;DamageEvents;DamageTaken;ShotsFired;Kills;HealthPickups;AmmoPickups;+" +
-                                "TimeToFirstHit;MaxAlerted\n";
+                string header = "Episode;SurvivalTime;TotalReward;Died;DamageEvents;DamageTaken;ShotsFired;Kills;HealthPickups;AmmoPickups;" +
+                                "TimeToFirstHit;MaxAlerted;DashesUsed\n";
 
                 if (File.Exists(path))
                 {
@@ -395,7 +460,7 @@ namespace QLearning
                 Debug.Log($"Stored at {path}");
                 
                 
-                if (!_evaluating)
+                if (!_evaluating && !_randomRun)
                     store.SaveToFile(modelFileName);
                 
 

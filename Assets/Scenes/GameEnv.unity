@@ -332,14 +332,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 28a7e7c399814c5e888acdd63d3dcf33, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  controlledByExperimentManager: 0
+  controlledByExperimentManager: 1
   loadSavedModel: 0
-  modelFileName: Godplease_train0
-  csvTrainedName: Godplease_train0
+  modelFileName: Godplease_r1
+  csvTrainedName: Godplease_r1
   playerModel: {fileID: 115344530}
   aiDirector: {fileID: 917447353}
   problem: {fileID: 115344531}
-  totalEpisodes: 400
+  totalEpisodes: 600
   alpha: 0.1
   gamma: 0.95
   rho: 1
@@ -351,7 +351,7 @@ MonoBehaviour:
   episodeTimeout: 120
   timeScale: 50
   store: {fileID: 115344529}
-  logInterval: 25
+  logInterval: 50
   zombieSpawner: {fileID: 41375028}
   pickupSpawner: {fileID: 491440605}
   evalEpisodes: 50
@@ -676,6 +676,9 @@ MonoBehaviour:
   spawnRate: 1
   activePickups: []
   player: {fileID: 0}
+  needWeighted: 1
+  baseTypeWeight: 0.5
+  agent: {fileID: 0}
 --- !u!1 &584678606
 GameObject:
   m_ObjectHideFlags: 0
@@ -1487,7 +1490,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1178034138}
-  m_Enabled: 0
+  m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: d2aa7636139b00e47b98f10aedfab882, type: 3}
   m_Name: 
@@ -1497,6 +1500,11 @@ MonoBehaviour:
   director: {fileID: 917447353}
   seeds: 2a0000002b0000002c000000
   difficulties: 00000000010000000200000003000000
+  filePrefix: final
+  runRandomBaseline: 1
+  randomEpisodes: 100
+  runEvaluation: 1
+  evalSeedOffset: 1000
   postRunDelaySeconds: 3
   currentRun: 
   runNumber: 0
