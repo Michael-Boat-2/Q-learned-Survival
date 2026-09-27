@@ -1,39 +1,26 @@
-"""
-Plots + statistics for the DDA survival experiment.
 
-Expects (in CSV_DIR), for each difficulty d and seed s:
-    {PREFIX}_{d}_seed{s}.csv        training log
-    {PREFIX}_{d}_seed{s}_eval.csv   greedy evaluation log
-    {PREFIX}_{d}_random.csv         random-policy baseline
+#Plots + statistics for the DDA survival experiment.
 
-Outputs (in OUTPUT_DIR):
-    fig1_learning_curves.png   per-condition survival curves (small multiples)
-    fig2_cross_condition.png   all conditions on one axis
-    fig3_win_rate.png          rolling win rate over training
-    fig4_eval_vs_random.png    greedy evaluation vs random baseline (box plots)
-    summary_stats.csv          table of numbers for the paper
-    stats_report.txt           significance tests
-"""
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 from pathlib import Path
 from scipy.stats import mannwhitneyu, kruskal
 
-# ============= CONFIGURATION =============
+# CONFIGURATION
 CSV_DIR = Path(".")
 PREFIX = "final"
 DIFFICULTIES = ["easy", "baseline", "hard", "ai"]
 LABELS = {"easy": "Easy", "baseline": "Baseline", "hard": "Hard", "ai": "AI Director"}
 SEEDS = [42, 43, 44]
 TIMEOUT = 120.0
-SMOOTH = 25          # rolling window (episodes) for learning curves
-WIN_WINDOW = 50      # rolling window for win rate
-FINAL_BLOCK = 100    # "final performance" = last N training episodes
+SMOOTH = 25                              # rolling window (episodes) for learning curves
+WIN_WINDOW = 50                          # rolling window for win rate
+FINAL_BLOCK = 100                        # "final performance" = last N training episodes
 OUTPUT_DIR = Path("plots_final")
 OUTPUT_DIR.mkdir(exist_ok=True)
 
-# Validated categorical palette, fixed order (colorblind-checked)
+# category color palette
 COLORS = {"easy": "#2a78d6", "baseline": "#eb6834", "hard": "#1baf7a", "ai": "#eda100"}
 INK, INK2, GRID = "#222222", "#666666", "#e6e6e6"
 
@@ -45,7 +32,7 @@ plt.rcParams.update({
 })
 
 
-# ============= LOAD =============
+# LOAD 
 def read(path):
     if not path.exists():
         print(f"Missing: {path}")
@@ -68,7 +55,7 @@ for d in DIFFICULTIES:
 
 
 def curve(dfs, metric, window):
-    """Rolling mean per seed -> mean across seeds, plus min/max seed band."""
+    # Rolling mean per seed, mean across seeds, with min/max seed band
     n = min(len(df) for df in dfs)
     rolled = np.array([df[metric].iloc[:n].rolling(window, min_periods=1).mean().values
                        for df in dfs])
@@ -76,7 +63,7 @@ def curve(dfs, metric, window):
     return ep, rolled.mean(0), rolled.min(0), rolled.max(0)
 
 
-# ============= FIG 1: PER-CONDITION LEARNING CURVES =============
+# PER-CONDITION LEARNING CURVES 
 fig, axes = plt.subplots(2, 2, figsize=(11, 7.5), sharex=True, sharey=True)
 for ax, d in zip(axes.flat, DIFFICULTIES):
     c = COLORS[d]
@@ -102,7 +89,7 @@ fig.savefig(OUTPUT_DIR / "fig1_learning_curves.png", dpi=200)
 plt.close(fig)
 
 
-# ============= FIG 2: CROSS-CONDITION =============
+# CROSS-CONDITION 
 fig, ax = plt.subplots(figsize=(10, 5.5))
 for d in DIFFICULTIES:
     if not data[d]["train"]:
@@ -124,7 +111,7 @@ fig.savefig(OUTPUT_DIR / "fig2_cross_condition.png", dpi=200)
 plt.close(fig)
 
 
-# ============= FIG 3: ROLLING WIN RATE =============
+# ROLLING WIN RATE
 fig, ax = plt.subplots(figsize=(10, 5.5))
 for d in DIFFICULTIES:
     if not data[d]["train"]:
@@ -144,7 +131,7 @@ fig.savefig(OUTPUT_DIR / "fig3_win_rate.png", dpi=200)
 plt.close(fig)
 
 
-# ============= FIG 4: GREEDY EVAL vs RANDOM =============
+# GREEDY EVAL vs RANDOM 
 fig, ax = plt.subplots(figsize=(10, 5.5))
 positions, boxes, colors, ticks, ticklabels = [], [], [], [], []
 for i, d in enumerate(DIFFICULTIES):
@@ -171,9 +158,9 @@ fig.savefig(OUTPUT_DIR / "fig4_eval_vs_random.png", dpi=200)
 plt.close(fig)
 
 
-# ============= GENERIC HELPERS (any metric) =============
+# Helpers for any metric
 def per_condition(metric, ylabel, title, fname, ylim=None, show_timeout=False):
-    """2x2 small multiples: one panel per condition, random median as reference."""
+    # 2x2 small multiples: one panel per condition, random median as reference
     fig, axes = plt.subplots(2, 2, figsize=(11, 7.5), sharex=True, sharey=True)
     for ax, d in zip(axes.flat, DIFFICULTIES):
         c = COLORS[d]
@@ -202,7 +189,7 @@ def per_condition(metric, ylabel, title, fname, ylim=None, show_timeout=False):
 
 
 def overlay(ax, metric, ylabel, title, label_ends=True):
-    """All conditions on one axis, direct-labelled line ends."""
+    # All conditions on one axis, direct-labelled line ends
     last_ep = None
     for d in DIFFICULTIES:
         if not data[d]["train"]:
@@ -226,7 +213,7 @@ for d in DIFFICULTIES:
         df["Pickups"] = df["HealthPickups"] + df["AmmoPickups"]
 
 
-# ============= FIG 5 & 6: RETURN (TOTAL REWARD) =============
+# FIG 5 & 6: RETURN (TOTAL REWARD) 
 per_condition("TotalReward", "Episode return", "Episode return by difficulty condition",
               "fig5_return_per_condition.png")
 
@@ -240,7 +227,7 @@ fig.savefig(OUTPUT_DIR / "fig6_return_cross_condition.png", dpi=200)
 plt.close(fig)
 
 
-# ============= FIG 7: BEHAVIOUR METRICS (small multiples) =============
+# FIG 7: BEHAVIOUR METRICS
 BEHAVIOUR = [
     ("Kills", "Kills", "Kills per episode"),
     ("Pickups", "Pickups", "Pickups collected per episode"),
@@ -259,7 +246,7 @@ fig.savefig(OUTPUT_DIR / "fig7_behaviour.png", dpi=200)
 plt.close(fig)
 
 
-# ============= STATS =============
+# STATS 
 def iqr(x):
     return f"{np.percentile(x, 25):.1f}-{np.percentile(x, 75):.1f}"
 
@@ -297,19 +284,5 @@ for d in DIFFICULTIES:
 summary = pd.DataFrame(rows)
 summary.to_csv(OUTPUT_DIR / "summary_stats.csv", index=False)
 
-if len(evals_all) > 1:
-    h = kruskal(*evals_all.values())
-    report.append(f"Kruskal-Wallis across conditions (greedy eval survival): H={h.statistic:.2f}, p={h.pvalue:.2e}")
-    if "baseline" in evals_all:
-        k = len(evals_all) - 1
-        report.append(f"\nPairwise vs Baseline (Mann-Whitney U, Bonferroni x{k}):")
-        for d, x in evals_all.items():
-            if d == "baseline":
-                continue
-            p = mannwhitneyu(x, evals_all["baseline"], alternative="two-sided").pvalue
-            report.append(f"  {LABELS[d]:<12} p={p:.2e}  adj p={min(1, p * k):.2e}")
 
-text = summary.to_string(index=False) + "\n\n" + "\n".join(report)
-(OUTPUT_DIR / "stats_report.txt").write_text(text)
-print(text)
 print(f"\nAll outputs saved to: {OUTPUT_DIR.resolve()}")
