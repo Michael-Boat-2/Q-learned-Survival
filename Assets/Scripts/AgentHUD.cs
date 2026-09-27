@@ -27,7 +27,7 @@ public class AgentHUD : MonoBehaviour
     [SerializeField] private Image survivalFill;          
     [SerializeField] private TMP_Text episodeText;       
     [SerializeField] private TMP_Text winRateText;      
-    [SerializeField] private TMP_Text modeText;           
+    //[SerializeField] private TMP_Text modeText;           
 
     private float _shownHealth = 1f;
 
@@ -65,7 +65,7 @@ public class AgentHUD : MonoBehaviour
                 healthFill.color = healthColour.Evaluate(_shownHealth);
             }
             if (healthText)
-                healthText.text = $"{Mathf.CeilToInt(problem.GetHealth())} / {Mathf.CeilToInt(problem.MaxHealth)}";
+                healthText.text = $"HP: {Mathf.CeilToInt(problem.GetHealth())} / {Mathf.CeilToInt(problem.MaxHealth)}";
 
             // Ammo UI
             if (ammoText)
@@ -91,7 +91,7 @@ public class AgentHUD : MonoBehaviour
                     ? $"Win rate {agent.WinRate * 100f:0}%  ({agent.Wins}/{agent.EpisodesCompleted})"
                     : "Win rate --";
 
-            if (modeText) modeText.text = agent.Mode;
+            /*if (modeText) modeText.text = agent.Mode;*/
         }
     }
 }

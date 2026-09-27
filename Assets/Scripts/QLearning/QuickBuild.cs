@@ -20,8 +20,21 @@ public class QuickBuild : MonoBehaviour
 
     public void SceneManagerLoad()
     {
-        SceneManager.LoadScene(1);
+        SceneManager.LoadScene(0);
     }
+
+    public void WatchTrain()
+    {
+        SceneManager.LoadScene("GameEnv");
+    }
+
+    public void WatchInfer()
+    {
+        SceneManager.LoadScene("GameEnvFancy");
+    }
+    
+    
+    
 
     public void Retry()
     {
