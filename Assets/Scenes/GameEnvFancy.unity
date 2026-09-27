@@ -1189,7 +1189,7 @@ MonoBehaviour:
   maxDistance: 30
   allowManualOrbit: 1
   orbitSpeed: 60
-  autoOrbit: 0
+  autoOrbit: 1
   autoOrbitSpeed: 6
   maxShakeOffset: 0.5
   shakeDecay: 1.5
@@ -1620,7 +1620,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 61a0980ed99e4c0890e2dcd79535c2da, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  level: 1
+  level: 3
   targetTension: 0.65
   currentTension: 0
   player: {fileID: 115344530}
@@ -1630,7 +1630,7 @@ MonoBehaviour:
   spawnRate: 1
   pickupRate: 1
   rewardScaler: 1
-  hasScriptedEvent: 1
+  hasScriptedEvent: 0
   eventCooldown: 10
   bossZombie: {fileID: 5216269744462922817, guid: 73041ea4777be0048a5039e4e1310685, type: 3}
 --- !u!1 &921991932
