@@ -3,21 +3,17 @@ using UnityEngine.UI;
 using TMPro;
 using QLearning;
 
-/// <summary>
-/// Simple HUD for watching the agent. Read-only: never changes gameplay.
-/// Every UI reference is optional - leave a slot empty to hide that element.
-/// </summary>
+
 public class AgentHUD : MonoBehaviour
 {
-    [Header("Sources")]
+    [Header("References")]
     [SerializeField] private ReinforcementProblem problem;
     [SerializeField] private QLearnAgent agent;
 
     [Header("Health")]
-    [Tooltip("UI Image with Image Type = Filled (Horizontal).")]
     [SerializeField] private Image healthFill;
     [SerializeField] private TMP_Text healthText;
-    [SerializeField] private Gradient healthColour;          // right = full, left = empty
+    [SerializeField] private Gradient healthColour;        
     [SerializeField] private float fillLerpSpeed = 8f;
 
     [Header("Ammo")]
@@ -27,17 +23,17 @@ public class AgentHUD : MonoBehaviour
     [SerializeField] private Color ammoEmpty = new Color(1f, 0.25f, 0.25f);
 
     [Header("Episode")]
-    [SerializeField] private TMP_Text survivalText;          // "45.2 / 120 s"
-    [SerializeField] private Image survivalFill;             // optional progress bar to timeout
-    [SerializeField] private TMP_Text episodeText;           // "Episode 37 / 100"
-    [SerializeField] private TMP_Text winRateText;           // "Win rate 22% (8)"
-    [SerializeField] private TMP_Text modeText;              // "Evaluation"
+    [SerializeField] private TMP_Text survivalText;         
+    [SerializeField] private Image survivalFill;          
+    [SerializeField] private TMP_Text episodeText;       
+    [SerializeField] private TMP_Text winRateText;      
+    [SerializeField] private TMP_Text modeText;           
 
     private float _shownHealth = 1f;
 
     private void Reset()
     {
-        // sensible default gradient: red -> yellow -> green
+        
         healthColour = new Gradient();
         healthColour.SetKeys(
             new[] { new GradientColorKey(new Color(0.9f, 0.2f, 0.2f), 0f),
@@ -55,11 +51,11 @@ public class AgentHUD : MonoBehaviour
 
     private void LateUpdate()
     {
-        float dt = Time.unscaledDeltaTime;   // smooth even at high time scale
+        float dt = Time.unscaledDeltaTime;   
 
         if (problem)
         {
-            // --- Health ---
+            // Health UI 
             float hp = problem.GetHealthRatio();
             _shownHealth = Mathf.Lerp(_shownHealth, hp, 1f - Mathf.Exp(-fillLerpSpeed * dt));
             if (Mathf.Abs(_shownHealth - hp) > 0.5f) _shownHealth = hp;   // snap on respawn
@@ -71,7 +67,7 @@ public class AgentHUD : MonoBehaviour
             if (healthText)
                 healthText.text = $"{Mathf.CeilToInt(problem.GetHealth())} / {Mathf.CeilToInt(problem.MaxHealth)}";
 
-            // --- Ammo ---
+            // Ammo UI
             if (ammoText)
             {
                 int ammo = Mathf.RoundToInt(problem.GetAmmo());
