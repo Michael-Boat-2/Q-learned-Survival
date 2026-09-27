@@ -21,16 +21,20 @@ namespace QLearning
 
         [Header("Run Phases")]
         [SerializeField] private string filePrefix = "final";
-        [SerializeField] private bool runRandomBaseline = true;   // once per difficulty
+        // once per difficulty
+        [SerializeField] private bool runRandomBaseline = true;   
         [SerializeField] private int randomEpisodes = 100;
-        [SerializeField] private bool runEvaluation = true;       // after each training run
-        [SerializeField] private int evalSeedOffset = 1000;       // eval uses a different seed than training
-
+        // after each training run
+        [SerializeField] private bool runEvaluation = true;  
+        // eval uses a different seed than training
+        [SerializeField] private int evalSeedOffset = 1000;   
+        
+        
         [Header("Timing")]
-        [Tooltip("Real-time seconds to wait after each run completes before starting the next.")]
+        // Real-time seconds to wait after each run completes before starting the next
         [SerializeField] private float postRunDelaySeconds = 3f;
-
-        [Header("Status (read-only)")]
+        
+        [Header("Status")]
         [SerializeField] private string currentRun = "";
         [SerializeField] private int runNumber = 0;
         [SerializeField] private int totalRuns = 0;
@@ -51,11 +55,11 @@ namespace QLearning
             {
                 string diffName = difficulty.ToString().ToLower();
 
-                // 0. Random-policy baseline for this difficulty
+                // Random-policy baseline for this difficulty
                 if (runRandomBaseline)
                 {
                     currentRun = $"{filePrefix}_{diffName}_random";
-                    Debug.Log($"=== Random baseline: {currentRun} ===");
+                    Debug.Log($" Random baseline: {currentRun} ");
                     store.ResetQTable();
                     Random.InitState(seeds.Length > 0 ? seeds[0] : 42);
                     director.Level = difficulty;
@@ -69,34 +73,34 @@ namespace QLearning
                     runNumber++;
                     currentRun = $"{filePrefix}_{diffName}_seed{seed}";
 
-                    string csvName   = currentRun;      // e.g. baseline_seed42
-                    string modelName = currentRun;      // e.g. baseline_seed42
+                    string csvName   = currentRun;    
+                    string modelName = currentRun;    
 
-                    Debug.Log($"=== Run {runNumber}/{totalRuns}: {currentRun} ===");
+                    Debug.Log($"Run {runNumber}/{totalRuns}: {currentRun} ");
 
-                    // 1. Reset environment + Q-table
+                    // reset environment and our Q-table
                     store.ResetQTable();
 
-                    // 2. Seed Unity's random source for reproducibility
+                    // seed the random source for our Unity
                     Random.InitState(seed);
 
-                    // 3. Configure director and filenames
+                    // configure director and filenames
                     director.Level = difficulty;
                     agent.SetRunNames(csvName, modelName);
 
-                    // 4. Begin training
+                    // begin training
                     agent.BeginTraining();
 
-                    // 5. Wait until QLearnAgent reports completion
+                    // wait until QLearnAgent reports completion
                     while (agent.IsTraining())
                     {
                         yield return null;
                     }
 
-                    // 6. Give time for file write + Unity cleanup
+                    // yield for enough time for file writing
                     yield return new WaitForSecondsRealtime(postRunDelaySeconds);
 
-                    // 7. Greedy evaluation of the Q-table just trained
+                    // greedy evaluation of the Q-table just trained
                     if (runEvaluation)
                     {
                         Random.InitState(seed + evalSeedOffset);
@@ -106,11 +110,11 @@ namespace QLearning
                         yield return new WaitForSecondsRealtime(postRunDelaySeconds);
                     }
 
-                    Debug.Log($"=== Completed {currentRun} ===");
+                    Debug.Log($" Completed {currentRun}");
                 }
             }
 
-            Debug.Log("=== ALL EXPERIMENTS COMPLETE ===");
+            Debug.Log("End of Experiments");
             currentRun = "DONE";
         }
     }

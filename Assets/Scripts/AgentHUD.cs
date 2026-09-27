@@ -89,9 +89,9 @@ public class AgentHUD : MonoBehaviour
             if (winRateText)
                 winRateText.text = agent.EpisodesCompleted > 0
                     ? $"Win rate {agent.WinRate * 100f:0}%  ({agent.Wins}/{agent.EpisodesCompleted})"
-                    : "Win rate --";
+                    : "Win rate %%";
 
-            /*if (modeText) modeText.text = agent.Mode;*/
+         
         }
     }
 }

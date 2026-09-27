@@ -34,9 +34,8 @@ namespace QLearning
         [SerializeField] private int totalEpisodes = 800;
         
         [SerializeField] private float alpha = 0.1f;
-        // per-episode multiplier for alpha; 1 = constant learning rate
-        //[SerializeField] private float alphaDecay = 1f;
-        //[SerializeField] private float minimumAlpha = 0.01f;
+     
+        
         private float _initialAlpha;
         [SerializeField] private float gamma = 0.8f;
         [SerializeField] private float rho = 0.1f;
@@ -95,7 +94,7 @@ namespace QLearning
         // set be set to 1 in order to watch behaviours
         [SerializeField] private float evalTimeScale = 50f;   
         private bool _evaluating = false;
-        private bool _randomRun = false;      // pure random policy run (baseline)
+        private bool _randomRun = false;     
         private int _trainEpisodes;
         private float _trainMinimumRho;
         
@@ -116,8 +115,10 @@ namespace QLearning
                 
                 store.LoadFromFile(modelFileName);
                 _evaluating = true;
-                isTraining = true;          // reuse the episode loop
-                rho = 0f;                   // pure greedy
+                isTraining = true;        
+                
+                // pure greedy
+                rho = 0f;                  
                 totalEpisodes = evalEpisodes;
                 Time.timeScale = evalTimeScale;
                 Debug.Log($"Evaluating model '{modelFileName}' for {evalEpisodes} episodes");
@@ -129,7 +130,7 @@ namespace QLearning
             if (controlledByExperimentManager)
             {
                 Debug.Log("QLearnAgent waiting for ExperimentManager");
-                return;   // Manager will call BeginTraining()
+                return;  
             }
             
             
@@ -175,8 +176,7 @@ namespace QLearning
         }
         
         public bool IsTraining() => isTraining;
-
-        // --- read-only info for UI ---
+        
         private int _wins;
         public int EpisodesCompleted => _episodesCompleted;
         public int TotalEpisodes => totalEpisodes;
@@ -219,7 +219,7 @@ namespace QLearning
         }
         
         
-        // Greedy evaluation of a saved Q-table (no learning, no saving)
+        // Greedy evaluation of a saved Q-table 
         public void BeginEvaluation(string modelName, string evalName)
         {
             store.LoadFromFile(modelName);
@@ -235,7 +235,7 @@ namespace QLearning
             StartNewEpisode();
         }
 
-        // Pure random-policy baseline (rho fixed at 1, Q-table not saved)
+        // Pure random-policy baseline 
         public void BeginRandomBaseline(string csvName, int episodes)
         {
             _evaluating = false;

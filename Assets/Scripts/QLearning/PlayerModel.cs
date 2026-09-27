@@ -14,7 +14,8 @@ namespace QLearning
         
         //behavioral features
         public float HealthTrend{get;set;}
-        public float DamagePerMin { get; set; } //damage taken per min
+        //damage taken per min
+        public float DamagePerMin { get; set; }
         public float EnemyDensity{get;set;}
         public int SuccessStreak{get;set;}
         public int FailStreak { get; set; }

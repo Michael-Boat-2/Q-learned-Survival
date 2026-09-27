@@ -48,7 +48,7 @@ namespace QLearning
             }
             
             //Remove Dead Zombies
-            activeZombies.RemoveAll(z => z == null);
+            activeZombies.RemoveAll(z => !z);
             
             //Zombies at max capacity
             if (activeZombies.Count >= maxZombies) return;
@@ -73,7 +73,7 @@ namespace QLearning
                     Destroy(zombie);
             }
             activeZombies.Clear();
-            _spawnTimer = 0f;   // optional: force a spawn soon after reset
+            _spawnTimer = 0f;  
         }
         
         private void SpawnZombie()

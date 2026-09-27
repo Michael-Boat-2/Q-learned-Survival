@@ -30,7 +30,8 @@ namespace QLearning
 
         [Header("Need-Weighted Spawning")]
         [SerializeField] private bool needWeighted = true;
-        // base weight per type; lower = need matters more (0.5 -> up to 75/25 split)
+        
+        // base weight per type; lower = need matters more
         [SerializeField] private float baseTypeWeight = 0.5f;
         [SerializeField] private ReinforcementProblem agent;
         
@@ -51,7 +52,7 @@ namespace QLearning
         private void Update()
         {
             // Remove collected pickups
-            activePickups.RemoveAll(pickUp => pickUp == null);
+            activePickups.RemoveAll(pickUp => !pickUp);
             
             if (activePickups.Count >= maxPickups) return;
             
@@ -113,7 +114,8 @@ namespace QLearning
         
         private Vector3 GetSpawnPosition()
         {
-            for (int i = 0; i < 15; i++)   // try a few candidates
+             // try a few candidates
+            for (int i = 0; i < 15; i++)  
             {
                 Vector2 r = Random.insideUnitCircle.normalized * Random.Range(minFromPlayer, maxFromPlayer);
                 Vector3 c = player.position + new Vector3(r.x, 0, r.y);
@@ -124,7 +126,9 @@ namespace QLearning
                     if (Vector3.Distance(hit.position, z.transform.position) < minFromZombies) { safe = false; break; }
                 if (safe) return hit.position + Vector3.up * 0.5f;
             }
-            return transform.position;   // fallback: arena centre
+            
+            //the arena center is the fallback option
+            return transform.position;   
         }
         
         public void SetSpawnRate(float rate)
@@ -136,7 +140,7 @@ namespace QLearning
         {
             foreach (var pickup in activePickups)
             {
-                if (pickup != null) Destroy(pickup);
+                if (pickup) Destroy(pickup);
             }
             activePickups.Clear();
             _spawnTimer = 0f;

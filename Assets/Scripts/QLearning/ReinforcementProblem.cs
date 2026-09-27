@@ -85,7 +85,7 @@ namespace QLearning
         
         //animator
         private CharacterAnimator _characterAnimator;
-        private ShootVisuals _shootVisuals;   // visual only: face target + muzzle flash
+        private ShootVisuals _shootVisuals; 
 
         //private float rewardScale = 1f;
         
@@ -281,7 +281,7 @@ namespace QLearning
         private void EndDash()
         {
             dashTimer = 0f;
-            if (baseSpeed <= 0f) return; // Start() hasn't cached the base values yet
+            if (baseSpeed <= 0f) return; 
             navAgent.speed = baseSpeed;
             navAgent.acceleration = baseAcceleration;
         }
@@ -300,8 +300,8 @@ namespace QLearning
             
             float bestScore = float.MinValue;
             
-            
-            for (int i = 0; i < 8; i++)   // test 8 directions around the agent
+            // test 8 directions around the agent
+            for (int i = 0; i < 8; i++)  
             {
                 float ang = i * 45f * Mathf.Deg2Rad;
                 Vector3 target = pos + new Vector3(Mathf.Cos(ang), 0, Mathf.Sin(ang)) * mediumDistance;
@@ -332,10 +332,12 @@ namespace QLearning
         {
             // Find the nearest pickup
             
-            var p = FindBestPickup();   
-            if (!p) return 0;           // none on map
+            var p = FindBestPickup(); 
+            // none on map is 0
+            if (!p) return 0;        
             float d = Vector3.Distance(agentTransform.position, p.transform.position);
-            return d < pickupNearDistance ? 1 : 2;   // 1 = near, 2 = far
+            // 1 = near, 2 = far
+            return d < pickupNearDistance ? 1 : 2;  
         }
         
         
@@ -496,13 +498,15 @@ namespace QLearning
         
         
         
-        // 1 if the agent is within wallMargin of the NavMesh edge (walls), else 0
+        // 1 if the agent is within wallMargin of the NavMesh edge, else 0
+        /*
         private int GetNearWallCategory()
         {
             if (NavMesh.FindClosestEdge(agentTransform.position, out NavMeshHit hit, NavMesh.AllAreas))
                 return hit.distance < wallMargin ? 1 : 0;
             return 0;
         }
+        */
         
         
         
@@ -651,12 +655,13 @@ namespace QLearning
             Vector3 from = agentTransform.position;
             Vector3 to = from + dir * knockbackDistance;
 
-            // NavMesh.Raycast stops at walls/edges, so a cornered agent is pushed only as far as it can go
+            // NavMesh.Raycast that stops at walls
             if (NavMesh.Raycast(from, to, out NavMeshHit hit, NavMesh.AllAreas))
                 to = hit.position;
 
             navAgent.Warp(to);
-            navAgent.ResetPath();   // cancel the current move; the agent picks a new action next tick
+            // cancel the current move
+            navAgent.ResetPath();  
         }
         
         private int CountAlerted()
