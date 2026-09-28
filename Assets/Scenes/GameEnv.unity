@@ -341,7 +341,7 @@ MonoBehaviour:
   playerModel: {fileID: 115344530}
   aiDirector: {fileID: 917447353}
   problem: {fileID: 115344531}
-  totalEpisodes: 1500
+  totalEpisodes: 1000
   alpha: 0.1
   gamma: 0.95
   rho: 1
@@ -1976,9 +1976,9 @@ MonoBehaviour:
   store: {fileID: 115344529}
   director: {fileID: 917447353}
   seeds: 2a0000002b0000002c000000
-  difficulties: 00000000010000000200000003000000
-  filePrefix: final
-  runRandomBaseline: 1
+  difficulties: 0100000003000000
+  filePrefix: fixed_exploration
+  runRandomBaseline: 0
   randomEpisodes: 100
   runEvaluation: 1
   evalSeedOffset: 1000

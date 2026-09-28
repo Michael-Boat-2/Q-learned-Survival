@@ -1,0 +1,8 @@
+  Condition                Schedule  Train last100 median  Train last100 win %  Eval median   Eval IQR  Eval win %  Kills (last)  Pickups (last)  Damage (last)  Dashes (last)
+   Baseline Decaying ε (1.0 → 0.02)                  80.0                 18.3         89.1 66.1-110.5        22.0          17.6            10.4          142.0            4.2
+   Baseline                 Fixed ε                  68.6                  8.0         70.2  56.2-89.2         6.0          15.2             8.3          147.0            4.1
+AI Director Decaying ε (1.0 → 0.02)                  89.9                 19.7         88.8 69.8-114.5        18.0          17.8            11.1          168.0            4.9
+AI Director                 Fixed ε                  74.8                  5.0         70.4  49.0-89.0         7.3          14.6             8.6          158.0            4.5
+
+Baseline: eval survival, decaying vs fixed (Mann-Whitney U) p = 1.01e-05
+AI Director: eval survival, decaying vs fixed (Mann-Whitney U) p = 1.40e-07
