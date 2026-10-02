@@ -103,8 +103,7 @@ ax.set_xlim(0, ep[-1] * 1.13)
 ax.set_ylim(0, 130)
 ax.set_xlabel("Episode")
 ax.set_ylabel(f"Survival time (s), {SMOOTH}-ep rolling mean")
-ax.set_title("Survival time across conditions (mean of seeds, band = seed range)",
-             loc="left", color=INK)
+ax.set_title("Survival time across conditions", loc="center", color=INK, fontsize = 16)
 ax.legend(loc="lower right")
 fig.tight_layout()
 fig.savefig(OUTPUT_DIR / "fig2_cross_condition.png", dpi=200)
@@ -124,7 +123,7 @@ ax.set_xlim(0, ep[-1] * 1.13)
 ax.set_ylim(0, 105)
 ax.set_xlabel("Episode")
 ax.set_ylabel(f"Win rate (%), {WIN_WINDOW}-ep rolling")
-ax.set_title("Win rate (survived to timeout) during training", loc="left", color=INK)
+ax.set_title("Win rate during training", loc="center", color=INK, fontsize =16)
 ax.legend(loc="upper left")
 fig.tight_layout()
 fig.savefig(OUTPUT_DIR / "fig3_win_rate.png", dpi=200)
@@ -204,7 +203,7 @@ def overlay(ax, metric, ylabel, title, label_ends=True):
         ax.set_xlim(0, last_ep * 1.15)
     ax.set_xlabel("Episode")
     ax.set_ylabel(f"{ylabel}, {SMOOTH}-ep rolling mean")
-    ax.set_title(title, loc="left", color=INK)
+    ax.set_title(title, loc="center", color=INK, fontsize = 16)
 
 
 # Derived column: total pickups
@@ -219,7 +218,7 @@ per_condition("TotalReward", "Episode return", "Episode return by difficulty con
 
 fig, ax = plt.subplots(figsize=(10, 5.5))
 overlay(ax, "TotalReward", "Episode return",
-        "Episode return across conditions (mean of seeds, band = seed range)")
+        "Episode return across conditions")
 ax.axhline(0, color=INK2, linewidth=0.8)
 ax.legend(loc="lower right")
 fig.tight_layout()
